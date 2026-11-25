@@ -332,12 +332,18 @@
         <label class="block text-xs font-semibold text-slate-300">Clé API Gemini (Google AI Studio)</label>
         <input id="settings-api-key" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
         <div class="pt-1">
-          <label class="block text-xs font-semibold text-slate-300 mb-1">Modèle Gemini (quota indépendant par modèle)</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-slate-300">Modèle Gemini</label>
+            <button type="button" onclick="detectAvailableModels()" class="text-[11px] text-emerald-400 hover:text-emerald-300 underline">Détecter modèles actifs</button>
+          </div>
           <select id="settings-model-select" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-            <option value="gemini-3.8-flash-lite">gemini-3.8-flash-lite (Rapide · Quota séparé)</option>
-            <option value="gemini-3.8-flash">gemini-3.8-flash (Standard · 20 req/jour gratuit)</option>
-            <option value="gemini-2.5-flash">gemini-2.5-flash (Alternative stable)</option>
+            <option value="gemini-3.5-flash-lite">gemini-3.5-flash-lite (Flash-Lite · Rapide)</option>
+            <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Flash-Lite 3.1)</option>
+            <option value="gemini-3.8-flash">gemini-3.8-flash (Flash 3.8)</option>
+            <option value="gemini-3.6-flash">gemini-3.6-flash (Flash 3.6)</option>
+            <option value="gemini-4-hydrogen">gemini-4-hydrogen (Gemini 4 Hydrogen)</option>
           </select>
+          <p id="model-detect-status" class="hidden text-[11px] text-slate-400 mt-1"></p>
         </div>
       </div>
 
@@ -425,7 +431,7 @@
     const MODEL_STORAGE = 'coachpulse_gemini_model';
     const GH_TOKEN_STORAGE = 'coachpulse_github_token';
     const GH_GIST_ID_STORAGE = 'coachpulse_github_gist_id';
-    const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash-lite';
+    const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite';
 
     function getMondayOfCurrentWeek() {
       const d = new Date();
@@ -483,7 +489,9 @@
     }
 
     function getSelectedModel() {
-      return (localStorage.getItem(MODEL_STORAGE) || DEFAULT_GEMINI_MODEL).trim();
+      const saved = (localStorage.getItem(MODEL_STORAGE) || DEFAULT_GEMINI_MODEL).trim();
+      if (saved === 'gemini-3.8-flash-lite') return DEFAULT_GEMINI_MODEL;
+      return saved;
     }
 
     function getGhToken() {
@@ -492,6 +500,51 @@
 
     function getGhGistId() {
       return (localStorage.getItem(GH_GIST_ID_STORAGE) || '').trim();
+    }
+
+    async function detectAvailableModels() {
+      const apiKey = (document.getElementById('settings-api-key').value || getApiKey()).trim();
+      const statusEl = document.getElementById('model-detect-status');
+      const selectEl = document.getElementById('settings-model-select');
+
+      if (!apiKey) {
+        statusEl.classList.remove('hidden');
+        statusEl.className = 'text-[11px] text-rose-400 mt-1';
+        statusEl.textContent = "Colle d'abord ta clé API Gemini.";
+        return;
+      }
+
+      statusEl.classList.remove('hidden');
+      statusEl.className = 'text-[11px] text-sky-400 mt-1';
+      statusEl.textContent = "Interrogation de /v1beta/models...";
+
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+
+        const models = (data.models || [])
+          .filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent'))
+          .map(m => m.name.replace(/^models\//, ''))
+          .filter(id => !id.includes('embedding') && !id.includes('imagen') && !id.includes('veo') && !id.includes('tts'));
+
+        if (!models.length) throw new Error("Aucun modèle texte détecté pour cette clé.");
+
+        const currentVal = selectEl.value;
+        selectEl.innerHTML = models.map(id => `<option value="${escapeHtml(id)}">${escapeHtml(id)}</option>`).join('');
+        if (models.includes(currentVal)) {
+          selectEl.value = currentVal;
+        } else {
+          const preferred = models.find(id => id.includes('flash-lite')) || models.find(id => id.includes('flash')) || models[0];
+          selectEl.value = preferred;
+        }
+
+        statusEl.className = 'text-[11px] text-emerald-400 mt-1';
+        statusEl.textContent = `${models.length} modèles actifs chargés dans la liste ✓`;
+      } catch (err) {
+        statusEl.className = 'text-[11px] text-rose-400 mt-1';
+        statusEl.textContent = err.message;
+      }
     }
 
     function compressImageFile(file, maxWidth = 1200, quality = 0.78) {
@@ -1092,7 +1145,16 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
 
     function openSettings() {
       document.getElementById('settings-api-key').value = getApiKey();
-      document.getElementById('settings-model-select').value = getSelectedModel();
+      const selectEl = document.getElementById('settings-model-select');
+      const currentModel = getSelectedModel();
+      if (!Array.from(selectEl.options).some(o => o.value === currentModel)) {
+        const opt = document.createElement('option');
+        opt.value = currentModel;
+        opt.textContent = currentModel;
+        selectEl.appendChild(opt);
+      }
+      selectEl.value = currentModel;
+      document.getElementById('model-detect-status').classList.add('hidden');
       document.getElementById('settings-github-token').value = getGhToken();
       document.getElementById('gist-feedback').classList.add('hidden');
       document.getElementById('modal-settings').classList.remove('hidden');
@@ -1165,7 +1227,7 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
     function updateBadges() {
       const badge = document.getElementById('api-badge');
       const model = getSelectedModel();
-      const shortName = model.includes('lite') ? '3.8 Lite' : (model.includes('2.5') ? '2.5 Flash' : '3.8 Flash');
+      const shortName = model.length > 14 ? model.slice(0, 14) + '…' : model;
       if (getApiKey()) {
         badge.textContent = `${shortName} ✓`;
         badge.className = 'text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
