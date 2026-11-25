@@ -89,7 +89,7 @@
         </div>
       </div>
 
-      <!-- Empty State (when no program is loaded) -->
+      <!-- Empty State -->
       <div id="empty-plan-state" class="glass-card rounded-2xl p-6 text-center space-y-4">
         <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -427,9 +427,6 @@
   </div>
 
   <script>
-    // ==========================================
-    // STATE & STORAGE
-    // ==========================================
     const STORAGE_KEY = 'coachpulse_state_v3';
     const API_KEY_STORAGE = 'coachpulse_gemini_api_key';
     const GH_TOKEN_STORAGE = 'coachpulse_github_token';
@@ -445,7 +442,7 @@
     }
 
     const defaultState = {
-      program: null, // { title, startDate, weeks: [ { weekNumber, sessions: [ { id, day, sport, title, duration, details, completed, rpe, notes, aiFeedback, completedAt } ] } ] }
+      program: null,
       selectedWeek: 1,
       paces: {
         hm: '--:-- /km',
@@ -499,9 +496,6 @@
       return (localStorage.getItem(GH_GIST_ID_STORAGE) || '').trim();
     }
 
-    // ==========================================
-    // IMAGE COMPRESSION FOR IPHONE / SAFARI
-    // ==========================================
     function compressImageFile(file, maxWidth = 1200, quality = 0.78) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -530,9 +524,6 @@
       });
     }
 
-    // ==========================================
-    // GEMINI API CALL (MODEL: gemini-3.8-flash)
-    // ==========================================
     async function callGeminiAPI({ prompt, systemInstruction = '', imageBase64 = null, responseMimeType = null }) {
       const apiKey = getApiKey();
       if (!apiKey) {
@@ -587,9 +578,6 @@
       return text;
     }
 
-    // ==========================================
-    // CALENDAR WEEK CALCULATION
-    // ==========================================
     function computeCurrentCalendarWeek() {
       if (!state.program || !state.program.startDate || !state.program.weeks?.length) return 1;
       const start = new Date(state.program.startDate + 'T00:00:00');
@@ -611,9 +599,6 @@
       return `${start.toLocaleDateString('fr-FR', opts)} – ${end.toLocaleDateString('fr-FR', opts)}`;
     }
 
-    // ==========================================
-    // IMPORT PROGRAM PARSING
-    // ==========================================
     async function processProgramImport() {
       const titleInput = document.getElementById('import-title').value.trim();
       const startDate = document.getElementById('import-start-date').value || getMondayOfCurrentWeek();
@@ -629,6 +614,7 @@
       btn.disabled = true;
       btn.textContent = "Analyse IA en cours...";
       statusEl.classList.remove('hidden');
+      statusEl.className = 'text-xs text-emerald-400 font-medium';
       statusEl.textContent = "Découpage des semaines et des séances via Gemini...";
 
       try {
@@ -654,9 +640,7 @@ Transforme le texte fourni par l'utilisateur en un objet JSON strict respectant 
 Si le texte ne précise pas de numéro de semaine, regroupe toutes les séances dans weekNumber: 1. Réponds uniquement en JSON valide.`;
 
         const jsonStr = await callGeminiAPI({
-          prompt: `Programme à structurer :
-
-${rawText}`,
+          prompt: "Programme à structurer :\n\n" + rawText,
           systemInstruction: systemPrompt,
           responseMimeType: 'application/json'
         });
@@ -702,9 +686,6 @@ ${rawText}`,
       }
     }
 
-    // ==========================================
-    // SESSION CHECK & DEBRIEF
-    // ==========================================
     function toggleSessionCheck(sessionId) {
       const session = findSessionById(sessionId);
       if (!session) return;
@@ -816,8 +797,7 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
         session.completedAt = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
         saveState();
 
-        feedbackBox.innerHTML = `<div class="font-bold text-emerald-400 mb-1">Retour du Coach :</div><div>${escapeHtml(aiReply).replace(/
-/g, '<br>')}</div>`;
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-400 mb-1">Retour du Coach :</div><div>${formatMultiline(aiReply)}</div>`;
         btn.textContent = "Terminé ✓";
         setTimeout(() => closeModal('modal-debrief'), 1800);
       } catch (err) {
@@ -828,9 +808,6 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
       }
     }
 
-    // ==========================================
-    // COACH CHAT & LIVE PLAN UPDATES
-    // ==========================================
     async function handleChatImageSelect(event) {
       const file = event.target.files?.[0];
       if (!file) return;
@@ -954,9 +931,6 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
       }
     }
 
-    // ==========================================
-    // GITHUB GIST SYNC & LOCAL JSON BACKUP
-    // ==========================================
     async function syncToGitHubGist() {
       const token = document.getElementById('settings-github-token').value.trim() || getGhToken();
       const feedback = document.getElementById('gist-feedback');
@@ -973,7 +947,6 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
       try {
         let gistId = getGhGistId();
 
-        // Search existing Gist if ID not stored locally
         if (!gistId) {
           const listRes = await fetch('https://api.github.com/gists', {
             headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' }
@@ -1117,9 +1090,6 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
       }
     }
 
-    // ==========================================
-    // MODALS & NAVIGATION
-    // ==========================================
     function switchTab(tab) {
       ['plan', 'chat', 'history'].forEach(t => {
         document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
@@ -1206,9 +1176,10 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
         .replace(/"/g, '&quot;');
     }
 
-    // ==========================================
-    // RENDERING
-    // ==========================================
+    function formatMultiline(str) {
+      return escapeHtml(str).split(/\r?\n/).join('<br>');
+    }
+
     function updateBadges() {
       const badge = document.getElementById('api-badge');
       if (getApiKey()) {
@@ -1272,7 +1243,6 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
         : `Semaine ${state.selectedWeek} / ${state.program.weeks.length}`;
       document.getElementById('week-dates-label').textContent = getWeekDateRangeLabel(state.selectedWeek);
 
-      // Render week tabs
       const tabsEl = document.getElementById('week-tabs');
       tabsEl.innerHTML = state.program.weeks.map(w => {
         const active = w.weekNumber === state.selectedWeek;
@@ -1284,7 +1254,6 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
         }">S${w.weekNumber}${calDot}</button>`;
       }).join('');
 
-      // Render current week sessions
       const weekObj = state.program.weeks.find(w => w.weekNumber === state.selectedWeek) || state.program.weeks[0];
       const sessions = weekObj.sessions || [];
       const doneCount = sessions.filter(s => s.completed).length;
@@ -1342,9 +1311,8 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
                 ? 'bg-emerald-500 text-slate-950 font-medium rounded-br-sm'
                 : 'glass-card text-slate-200 rounded-bl-sm'
             }">
-              ${m.hasImage ? '<div class="text-[10px] font-bold opacity-80 mb-1">📷 Capture d'écran jointe</div>' : ''}
-              <div>${escapeHtml(m.text).replace(/
-/g, '<br>')}</div>
+              ${m.hasImage ? '<div class="text-[10px] font-bold opacity-80 mb-1">📷 Capture d\'écran jointe</div>' : ''}
+              <div>${formatMultiline(m.text)}</div>
               ${m.action ? `
                 <div class="mt-2.5 p-2.5 rounded-xl bg-slate-950/70 border border-emerald-500/40 space-y-2">
                   <div class="text-[11px] font-bold text-emerald-400">⚡ Proposition de mise à jour</div>
@@ -1391,8 +1359,7 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
           </div>
           <h4 class="text-sm font-bold text-white">${escapeHtml(s.title)}</h4>
           ${s.notes ? `<p class="text-xs text-slate-300 bg-slate-900/70 rounded-xl p-2.5">« ${escapeHtml(s.notes)} »</p>` : ''}
-          ${s.aiFeedback ? `<div class="text-xs text-slate-300 border-l-2 border-emerald-500 pl-2.5 leading-relaxed">${escapeHtml(s.aiFeedback).replace(/
-/g, '<br>')}</div>` : ''}
+          ${s.aiFeedback ? `<div class="text-xs text-slate-300 border-l-2 border-emerald-500 pl-2.5 leading-relaxed">${formatMultiline(s.aiFeedback)}</div>` : ''}
         </div>
       `).join('');
     }
@@ -1404,7 +1371,6 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
       renderHistory();
     }
 
-    // Initial boot
     if (state.program) {
       state.selectedWeek = computeCurrentCalendarWeek();
     }
