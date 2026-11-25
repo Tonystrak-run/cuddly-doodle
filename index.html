@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0b111e" />
+  <title>CoachPulse — Suivi & Coach IA Adaptatif</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #0b111e;
+      color: #f1f5f9;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+    .safe-top { padding-top: env(safe-area-inset-top, 12px); }
+    .safe-bottom { padding-bottom: env(safe-area-inset-bottom, 16px); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .glass-card {
+      background: rgba(20, 29, 47, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.55);
+    }
+    .check-pop { transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .check-pop:active { transform: scale(0.92); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-emerald-500/30">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-30 glass-card border-b border-slate-800/80 safe-top">
+    <div class="max-w-lg mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+          <svg class="w-5 h-5 text-slate-950" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-white leading-none">CoachPulse</h1>
+          <p id="header-subtitle" class="text-[11px] text-slate-400 mt-0.5">Suivi &amp; Coach IA Adaptatif</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span id="api-badge" class="text-[10px] font-semibold px-2 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
+          Clé requise
+        </span>
+        <button onclick="openSettings()" aria-label="Réglages" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main class="flex-1 max-w-lg w-full mx-auto px-4 pt-4 pb-28">
+
+    <!-- VIEW 1: PLANNING -->
+    <section id="view-plan" class="space-y-4">
+      <!-- Target Paces Banner -->
+      <div class="glass-card rounded-2xl p-3.5">
+        <div class="flex items-center justify-between mb-2.5">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Allures Cibles Actuelles</span>
+          <button onclick="openPacesModal()" class="text-xs font-medium text-emerald-400 hover:text-emerald-300">Modifier</button>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-slate-900/80 rounded-xl p-2 border border-slate-800">
+            <div class="text-[10px] text-slate-400">Semi-Marathon</div>
+            <div id="pace-hm" class="text-sm font-bold text-white mt-0.5">--:-- /km</div>
+          </div>
+          <div class="bg-slate-900/80 rounded-xl p-2 border border-slate-800">
+            <div class="text-[10px] text-slate-400">Seuil / 10 km</div>
+            <div id="pace-10k" class="text-sm font-bold text-emerald-400 mt-0.5">--:-- /km</div>
+          </div>
+          <div class="bg-slate-900/80 rounded-xl p-2 border border-slate-800">
+            <div class="text-[10px] text-slate-400">Endurance Z2</div>
+            <div id="pace-z2" class="text-sm font-bold text-sky-400 mt-0.5">--:-- /km</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State (when no program is loaded) -->
+      <div id="empty-plan-state" class="glass-card rounded-2xl p-6 text-center space-y-4">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-white">Aucun programme actif</h2>
+          <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+            Colle ton programme généré par Gemini (sur 1 ou plusieurs semaines) en précisant sa date de début, ou charge une sauvegarde depuis GitHub.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2.5 justify-center">
+          <button onclick="openImportModal()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20">
+            + Importer mon programme
+          </button>
+          <button onclick="openSettings()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+            Configurer Clé / GitHub
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Program Container -->
+      <div id="active-plan-container" class="hidden space-y-4">
+        <div class="glass-card rounded-2xl p-4 space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <span id="cycle-badge" class="inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                Semaine 1 · En cours
+              </span>
+              <h2 id="program-title" class="text-base font-bold text-white mt-1.5">Mon Programme</h2>
+              <div class="flex items-center gap-2 mt-1">
+                <span id="week-dates-label" class="text-xs text-slate-400"></span>
+                <button onclick="openStartDateModal()" class="text-[11px] text-sky-400 hover:text-sky-300 underline">Changer début</button>
+              </div>
+            </div>
+            <button onclick="openImportModal()" title="Importer un nouveau programme" class="p-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/20">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Week Selector Tabs -->
+          <div id="week-tabs" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1"></div>
+
+          <!-- Progress Bar -->
+          <div class="pt-1">
+            <div class="flex justify-between text-xs mb-1">
+              <span class="text-slate-400">Progression de la semaine</span>
+              <span id="progress-text" class="font-semibold text-emerald-400">0/0</span>
+            </div>
+            <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div id="progress-bar" class="h-full bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sessions List -->
+        <div id="sessions-list" class="space-y-3"></div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: COACH CHAT -->
+    <section id="view-chat" class="hidden flex flex-col h-[calc(100vh-175px)]">
+      <div class="glass-card rounded-2xl p-3 mb-3 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white">Coach IA · Contexte synchronisé</div>
+            <div class="text-[11px] text-slate-400">Prêt à estimer tes allures ou adapter ton planning</div>
+          </div>
+        </div>
+        <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-200 px-2 py-1">Vider</button>
+      </div>
+
+      <!-- Chat Messages -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 pr-1 pb-2"></div>
+
+      <!-- Quick Prompts -->
+      <div class="flex gap-2 overflow-x-auto no-scrollbar py-2">
+        <button onclick="sendQuickPrompt('Estime mon allure cible semi-marathon et 10 km en fonction de mes dernières séances.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
+          ⏱️ Estimer mon allure Semi
+        </button>
+        <button onclick="sendQuickPrompt('Je me sens fatigué cette semaine, allège mes prochaines séances tout en gardant le rythme.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
+          🔋 Adapter semaine (fatigue)
+        </button>
+        <button onclick="sendQuickPrompt('Décale ma prochaine séance de 24h et réajuste la semaine.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
+          📅 Décaler une séance
+        </button>
+      </div>
+
+      <!-- Image Preview in Chat -->
+      <div id="chat-image-preview" class="hidden mb-2 relative inline-block w-fit">
+        <img id="chat-preview-img" src="" alt="Aperçu" class="h-16 rounded-xl border border-emerald-500/50 object-cover" />
+        <button onclick="clearChatImage()" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500 text-white text-xs flex items-center justify-center font-bold">×</button>
+      </div>
+
+      <!-- Input Bar -->
+      <form onsubmit="handleChatSubmit(event)" class="flex items-center gap-2 pt-1">
+        <label class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer border border-slate-700 transition">
+          <input type="file" id="chat-image-input" accept="image/*" class="hidden" onchange="handleChatImageSelect(event)" />
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+        </label>
+        <input id="chat-input" type="text" placeholder="Pose une question au Coach ou envoie tes stats..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500" />
+        <button id="chat-send-btn" type="submit" class="p-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+        </button>
+      </form>
+    </section>
+
+    <!-- VIEW 3: HISTORIQUE -->
+    <section id="view-history" class="hidden space-y-4">
+      <div class="glass-card rounded-2xl p-4">
+        <h2 class="text-base font-bold text-white">Séances Validées &amp; Débriefs</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Retrouve tes ressentis et les analyses de tes captures d'écran.</p>
+      </div>
+      <div id="history-list" class="space-y-3"></div>
+    </section>
+
+  </main>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="fixed bottom-0 inset-x-0 z-30 glass-card border-t border-slate-800/80 safe-bottom">
+    <div class="max-w-lg mx-auto grid grid-cols-3 px-2 py-1.5">
+      <button onclick="switchTab('plan')" id="tab-plan" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 font-semibold transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+        </svg>
+        <span class="text-[11px]">Programme</span>
+      </button>
+
+      <button onclick="switchTab('chat')" id="tab-chat" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
+        </svg>
+        <span class="text-[11px]">Coach Chat</span>
+      </button>
+
+      <button onclick="switchTab('history')" id="tab-history" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        <span id="tab-history-label" class="text-[11px]">Historique (0)</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- MODAL: IMPORT PROGRAM -->
+  <div id="modal-import" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="glass-card w-full max-w-lg rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white">Importer un programme</h3>
+        <button onclick="closeModal('modal-import')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Titre du programme</label>
+          <input id="import-title" type="text" placeholder="Ex: Prépa Triathlon S / Semi-Marathon" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Date de début (Semaine 1)</label>
+          <input id="import-start-date" type="date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Colle le texte généré par Gemini</label>
+          <textarea id="import-raw-text" rows="7" placeholder="Colle ici ton programme sur 1 ou plusieurs semaines (ex: Semaine 1 : Lundi Vélo 1h30 Z2, Mercredi Course 45min...)..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"></textarea>
+        </div>
+      </div>
+      <div id="import-status" class="hidden text-xs text-emerald-400 font-medium"></div>
+      <div class="flex gap-2 pt-1">
+        <button onclick="closeModal('modal-import')" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Annuler</button>
+        <button id="import-submit-btn" onclick="processProgramImport()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
+          Analyser &amp; Créer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DEBRIEF SESSION -->
+  <div id="modal-debrief" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="glass-card w-full max-w-lg rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <div>
+          <span class="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Validation &amp; Débrief</span>
+          <h3 id="debrief-session-title" class="text-base font-bold text-white mt-0.5">Séance</h3>
+        </div>
+        <button onclick="closeModal('modal-debrief')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+      </div>
+
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Ressenti (RPE / Forme)</label>
+          <div class="grid grid-cols-4 gap-2" id="rpe-selector">
+            <button type="button" onclick="selectRpe('Facile')" data-rpe="Facile" class="rpe-btn py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-300">😎 Facile</button>
+            <button type="button" onclick="selectRpe('Maîtrisé')" data-rpe="Maîtrisé" class="rpe-btn py-2 rounded-xl bg-emerald-500/20 border border-emerald-500 text-xs font-semibold text-emerald-300">💪 Maîtrisé</button>
+            <button type="button" onclick="selectRpe('Difficile')" data-rpe="Difficile" class="rpe-btn py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-300">🥵 Difficile</button>
+            <button type="button" onclick="selectRpe('Épuisé')" data-rpe="Épuisé" class="rpe-btn py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-300">🪫 Épuisé</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Capture d'écran montre / appli (optionnel)</label>
+          <label class="flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-dashed border-slate-600 bg-slate-900/60 hover:bg-slate-900 cursor-pointer text-xs text-slate-300">
+            <input type="file" id="debrief-image-input" accept="image/*" class="hidden" onchange="handleDebriefImageSelect(event)" />
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            <span id="debrief-image-label">Ajouter une capture d'écran</span>
+          </label>
+          <img id="debrief-preview-img" src="" alt="Aperçu capture" class="hidden mt-2 max-h-36 rounded-xl border border-slate-700 mx-auto object-contain" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1">Notes / Sensations</label>
+          <textarea id="debrief-notes" rows="3" placeholder="Ex: Jambes un peu raides au début, FC moyenne 148 bpm, allure tenue sans forcer..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"></textarea>
+        </div>
+      </div>
+
+      <div id="debrief-ai-feedback" class="hidden rounded-2xl bg-slate-900/90 border border-emerald-500/30 p-3 text-xs text-slate-200 leading-relaxed"></div>
+
+      <div class="flex gap-2 pt-1">
+        <button onclick="saveDebriefOnly()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+          Valider sans IA
+        </button>
+        <button id="debrief-ai-btn" onclick="submitDebriefWithAI()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
+          Valider &amp; Analyser IA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SETTINGS (API, GITHUB GIST SYNC, JSON BACKUP) -->
+  <div id="modal-settings" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="glass-card w-full max-w-lg rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white">Réglages &amp; Sauvegardes</h3>
+        <button onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+      </div>
+
+      <!-- Gemini API Key -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-semibold text-slate-300">Clé API Gemini (Google AI Studio)</label>
+        <input id="settings-api-key" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+        <p class="text-[11px] text-slate-400">Modèle utilisé : <code class="text-emerald-400">gemini-3.8-flash</code>. Stockée uniquement sur ton appareil.</p>
+      </div>
+
+      <!-- GitHub Gist Cloud Sync -->
+      <div class="border-t border-slate-800 pt-3 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-white">Cloud GitHub (iPhone ↔ Mac)</span>
+          <span id="gist-status-badge" class="text-[10px] text-slate-400">Non connecté</span>
+        </div>
+        <input id="settings-github-token" type="password" placeholder="Token GitHub (ghp_... avec permission gist)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="syncToGitHubGist()" id="btn-gist-push" class="py-2 px-3 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-semibold transition">
+            ☁️ Sauvegarder
+          </button>
+          <button onclick="loadFromGitHubGist()" id="btn-gist-pull" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition">
+            📥 Charger
+          </button>
+        </div>
+        <p id="gist-feedback" class="hidden text-[11px] text-emerald-400"></p>
+      </div>
+
+      <!-- Local JSON Backup -->
+      <div class="border-t border-slate-800 pt-3 space-y-2">
+        <span class="block text-xs font-bold text-white">Sauvegarde fichier local (.json)</span>
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="exportJsonBackup()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition">
+            Exporter (.json)
+          </button>
+          <label class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold text-center cursor-pointer transition">
+            Restaurer (.json)
+            <input type="file" accept=".json,application/json" class="hidden" onchange="importJsonBackup(event)" />
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="border-t border-slate-800 pt-3 flex items-center justify-between gap-2">
+        <button onclick="resetAllData()" class="py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold">
+          Réinitialiser données
+        </button>
+        <button onclick="saveSettings()" class="py-2.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
+          Enregistrer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT PACES -->
+  <div id="modal-paces" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="glass-card w-full max-w-sm rounded-3xl p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white">Allures Cibles</h3>
+        <button onclick="closeModal('modal-paces')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Semi-Marathon (ex: 4:45 /km)</label>
+          <input id="input-pace-hm" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Seuil / 10 km (ex: 4:25 /km)</label>
+          <input id="input-pace-10k" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+        </div>
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Endurance Z2 (ex: 6:15 /km)</label>
+          <input id="input-pace-z2" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
+        </div>
+      </div>
+      <button onclick="savePaces()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold">Enregistrer</button>
+    </div>
+  </div>
+
+  <!-- MODAL: EDIT START DATE -->
+  <div id="modal-startdate" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
+    <div class="glass-card w-full max-w-sm rounded-3xl p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-bold text-white">Date de début du programme</h3>
+        <button onclick="closeModal('modal-startdate')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+      </div>
+      <input id="input-start-date" type="date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white" />
+      <button onclick="saveStartDate()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold">Mettre à jour</button>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // STATE & STORAGE
+    // ==========================================
+    const STORAGE_KEY = 'coachpulse_state_v3';
+    const API_KEY_STORAGE = 'coachpulse_gemini_api_key';
+    const GH_TOKEN_STORAGE = 'coachpulse_github_token';
+    const GH_GIST_ID_STORAGE = 'coachpulse_github_gist_id';
+    const GEMINI_MODEL = 'gemini-3.8-flash';
+
+    function getMondayOfCurrentWeek() {
+      const d = new Date();
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+      const monday = new Date(d.setDate(diff));
+      return monday.toISOString().split('T')[0];
+    }
+
+    const defaultState = {
+      program: null, // { title, startDate, weeks: [ { weekNumber, sessions: [ { id, day, sport, title, duration, details, completed, rpe, notes, aiFeedback, completedAt } ] } ] }
+      selectedWeek: 1,
+      paces: {
+        hm: '--:-- /km',
+        tenK: '--:-- /km',
+        z2: '--:-- /km'
+      },
+      chatHistory: [
+        {
+          role: 'assistant',
+          text: "Bonjour ! Je suis ton Coach IA personnel. Importe ton programme via le bouton « + » en haut, ou envoie-moi tes captures d'écran et tes sensations ici pour estimer tes allures et adapter ton entraînement en direct.",
+          time: 'Maintenant',
+          action: null
+        }
+      ]
+    };
+
+    let state = loadState();
+    let currentDebriefSessionId = null;
+    let currentDebriefRpe = 'Maîtrisé';
+    let currentDebriefImageBase64 = null;
+    let currentChatImageBase64 = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return JSON.parse(JSON.stringify(defaultState));
+        const parsed = JSON.parse(raw);
+        return {
+          ...JSON.parse(JSON.stringify(defaultState)),
+          ...parsed
+        };
+      } catch (e) {
+        return JSON.parse(JSON.stringify(defaultState));
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      renderAll();
+    }
+
+    function getApiKey() {
+      return (localStorage.getItem(API_KEY_STORAGE) || '').trim();
+    }
+
+    function getGhToken() {
+      return (localStorage.getItem(GH_TOKEN_STORAGE) || '').trim();
+    }
+
+    function getGhGistId() {
+      return (localStorage.getItem(GH_GIST_ID_STORAGE) || '').trim();
+    }
+
+    // ==========================================
+    // IMAGE COMPRESSION FOR IPHONE / SAFARI
+    // ==========================================
+    function compressImageFile(file, maxWidth = 1200, quality = 0.78) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve(dataUrl);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ==========================================
+    // GEMINI API CALL (MODEL: gemini-3.8-flash)
+    // ==========================================
+    async function callGeminiAPI({ prompt, systemInstruction = '', imageBase64 = null, responseMimeType = null }) {
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        throw new Error("Aucune clé API Gemini configurée. Ouvre la roue crantée en haut à droite pour coller ta clé.");
+      }
+
+      const parts = [];
+      if (prompt) {
+        parts.push({ text: prompt });
+      }
+      if (imageBase64) {
+        const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+        parts.push({
+          inlineData: {
+            mimeType: 'image/jpeg',
+            data: base64Data
+          }
+        });
+      }
+
+      const body = {
+        contents: [{ role: 'user', parts }]
+      };
+
+      if (systemInstruction) {
+        body.systemInstruction = { parts: [{ text: systemInstruction }] };
+      }
+
+      if (responseMimeType) {
+        body.generationConfig = { responseMimeType };
+      }
+
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const errMsg = data?.error?.message || response.statusText || 'Erreur inconnue';
+        throw new Error(`Erreur API Gemini : HTTP ${response.status} (${GEMINI_MODEL}) : ${errMsg}`);
+      }
+
+      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+      if (!text) {
+        throw new Error(`Réponse vide reçue de ${GEMINI_MODEL}.`);
+      }
+      return text;
+    }
+
+    // ==========================================
+    // CALENDAR WEEK CALCULATION
+    // ==========================================
+    function computeCurrentCalendarWeek() {
+      if (!state.program || !state.program.startDate || !state.program.weeks?.length) return 1;
+      const start = new Date(state.program.startDate + 'T00:00:00');
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const diffDays = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+      if (diffDays < 0) return 1;
+      const weekIdx = Math.floor(diffDays / 7) + 1;
+      return Math.min(Math.max(1, weekIdx), state.program.weeks.length);
+    }
+
+    function getWeekDateRangeLabel(weekNumber) {
+      if (!state.program || !state.program.startDate) return '';
+      const start = new Date(state.program.startDate + 'T00:00:00');
+      start.setDate(start.getDate() + (weekNumber - 1) * 7);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 6);
+      const opts = { day: 'numeric', month: 'short' };
+      return `${start.toLocaleDateString('fr-FR', opts)} – ${end.toLocaleDateString('fr-FR', opts)}`;
+    }
+
+    // ==========================================
+    // IMPORT PROGRAM PARSING
+    // ==========================================
+    async function processProgramImport() {
+      const titleInput = document.getElementById('import-title').value.trim();
+      const startDate = document.getElementById('import-start-date').value || getMondayOfCurrentWeek();
+      const rawText = document.getElementById('import-raw-text').value.trim();
+      const statusEl = document.getElementById('import-status');
+      const btn = document.getElementById('import-submit-btn');
+
+      if (!rawText) {
+        alert("Colle d'abord le texte de ton programme.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Analyse IA en cours...";
+      statusEl.classList.remove('hidden');
+      statusEl.textContent = "Découpage des semaines et des séances via Gemini...";
+
+      try {
+        const systemPrompt = `Tu es un parseur de programmes sportifs (course à pied, vélo, natation, triathlon, renforcement).
+Transforme le texte fourni par l'utilisateur en un objet JSON strict respectant exactement ce schéma :
+{
+  "title": "Titre court du programme",
+  "weeks": [
+    {
+      "weekNumber": 1,
+      "sessions": [
+        {
+          "day": "Lundi",
+          "sport": "Vélo" | "Course" | "Natation" | "Renfo" | "Autre",
+          "title": "Titre concis de la séance",
+          "duration": "Durée ou distance estimée",
+          "details": "Consignes détaillées, zones cardiaques ou allures"
+        }
+      ]
+    }
+  ]
+}
+Si le texte ne précise pas de numéro de semaine, regroupe toutes les séances dans weekNumber: 1. Réponds uniquement en JSON valide.`;
+
+        const jsonStr = await callGeminiAPI({
+          prompt: `Programme à structurer :
+
+${rawText}`,
+          systemInstruction: systemPrompt,
+          responseMimeType: 'application/json'
+        });
+
+        const parsed = JSON.parse(jsonStr);
+        if (!parsed.weeks || !Array.isArray(parsed.weeks) || parsed.weeks.length === 0) {
+          throw new Error("Aucune semaine détectée dans le programme.");
+        }
+
+        const formattedWeeks = parsed.weeks.map((w, wIdx) => ({
+          weekNumber: w.weekNumber || (wIdx + 1),
+          sessions: (w.sessions || []).map((s, sIdx) => ({
+            id: `w${wIdx + 1}_s${sIdx + 1}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+            day: s.day || `Jour ${sIdx + 1}`,
+            sport: s.sport || 'Autre',
+            title: s.title || 'Séance',
+            duration: s.duration || '',
+            details: s.details || '',
+            completed: false,
+            rpe: '',
+            notes: '',
+            aiFeedback: '',
+            completedAt: null
+          }))
+        }));
+
+        state.program = {
+          title: titleInput || parsed.title || 'Mon Programme',
+          startDate,
+          weeks: formattedWeeks
+        };
+        state.selectedWeek = computeCurrentCalendarWeek();
+        saveState();
+
+        closeModal('modal-import');
+        document.getElementById('import-raw-text').value = '';
+      } catch (err) {
+        statusEl.className = 'text-xs text-rose-400 font-medium';
+        statusEl.textContent = err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Analyser & Créer";
+      }
+    }
+
+    // ==========================================
+    // SESSION CHECK & DEBRIEF
+    // ==========================================
+    function toggleSessionCheck(sessionId) {
+      const session = findSessionById(sessionId);
+      if (!session) return;
+
+      if (session.completed) {
+        if (confirm("Décocher cette séance ?")) {
+          session.completed = false;
+          saveState();
+        }
+      } else {
+        openDebriefModal(sessionId);
+      }
+    }
+
+    function findSessionById(sessionId) {
+      if (!state.program?.weeks) return null;
+      for (const w of state.program.weeks) {
+        const found = w.sessions.find(s => s.id === sessionId);
+        if (found) return found;
+      }
+      return null;
+    }
+
+    function openDebriefModal(sessionId) {
+      const session = findSessionById(sessionId);
+      if (!session) return;
+      currentDebriefSessionId = sessionId;
+      currentDebriefRpe = session.rpe || 'Maîtrisé';
+      currentDebriefImageBase64 = null;
+
+      document.getElementById('debrief-session-title').textContent = `${session.day} · ${session.title}`;
+      document.getElementById('debrief-notes').value = session.notes || '';
+      document.getElementById('debrief-image-label').textContent = "Ajouter une capture d'écran";
+      document.getElementById('debrief-preview-img').classList.add('hidden');
+      document.getElementById('debrief-ai-feedback').classList.add('hidden');
+      selectRpe(currentDebriefRpe);
+
+      document.getElementById('modal-debrief').classList.remove('hidden');
+    }
+
+    function selectRpe(rpe) {
+      currentDebriefRpe = rpe;
+      document.querySelectorAll('.rpe-btn').forEach(btn => {
+        if (btn.dataset.rpe === rpe) {
+          btn.className = 'rpe-btn py-2 rounded-xl bg-emerald-500/20 border border-emerald-500 text-xs font-semibold text-emerald-300';
+        } else {
+          btn.className = 'rpe-btn py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-300';
+        }
+      });
+    }
+
+    async function handleDebriefImageSelect(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        document.getElementById('debrief-image-label').textContent = "Compression de l'image...";
+        currentDebriefImageBase64 = await compressImageFile(file);
+        const imgEl = document.getElementById('debrief-preview-img');
+        imgEl.src = currentDebriefImageBase64;
+        imgEl.classList.remove('hidden');
+        document.getElementById('debrief-image-label').textContent = "Capture prête ✓";
+      } catch (e) {
+        alert("Impossible de lire cette image.");
+      }
+    }
+
+    function saveDebriefOnly() {
+      const session = findSessionById(currentDebriefSessionId);
+      if (!session) return;
+      session.completed = true;
+      session.rpe = currentDebriefRpe;
+      session.notes = document.getElementById('debrief-notes').value.trim();
+      session.completedAt = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+      saveState();
+      closeModal('modal-debrief');
+    }
+
+    async function submitDebriefWithAI() {
+      const session = findSessionById(currentDebriefSessionId);
+      if (!session) return;
+
+      const notes = document.getElementById('debrief-notes').value.trim();
+      const feedbackBox = document.getElementById('debrief-ai-feedback');
+      const btn = document.getElementById('debrief-ai-btn');
+
+      btn.disabled = true;
+      btn.textContent = "Analyse IA...";
+      feedbackBox.classList.remove('hidden');
+      feedbackBox.textContent = "Analyse de ta séance et de tes données par Gemini...";
+
+      try {
+        const prompt = `Analyse cette séance réalisée par l'athlète :
+- Séance prévue : ${session.day} - ${session.title} (${session.sport}, ${session.duration}) : ${session.details}
+- Ressenti (RPE) : ${currentDebriefRpe}
+- Notes de l'athlète : ${notes || 'Aucune note'}
+- Allures cibles actuelles : Semi ${state.paces.hm}, 10km ${state.paces.tenK}, Z2 ${state.paces.z2}
+
+Si une capture d'écran de montre/activité est jointe, lis les métriques (distance, durée, allure/vitesse, fréquence cardiaque, dénivelé) et compare avec l'objectif. Donne un retour concis, concret et bienveillant en français (3 à 5 phrases max) avec un conseil de récupération ou d'ajustement si pertinent.`;
+
+        const aiReply = await callGeminiAPI({
+          prompt,
+          imageBase64: currentDebriefImageBase64
+        });
+
+        session.completed = true;
+        session.rpe = currentDebriefRpe;
+        session.notes = notes;
+        session.aiFeedback = aiReply;
+        session.completedAt = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+        saveState();
+
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-400 mb-1">Retour du Coach :</div><div>${escapeHtml(aiReply).replace(/
+/g, '<br>')}</div>`;
+        btn.textContent = "Terminé ✓";
+        setTimeout(() => closeModal('modal-debrief'), 1800);
+      } catch (err) {
+        feedbackBox.innerHTML = `<span class="text-rose-400">⚠️ ${escapeHtml(err.message)}</span>`;
+      } finally {
+        btn.disabled = false;
+        if (btn.textContent === "Analyse IA...") btn.textContent = "Valider & Analyser IA";
+      }
+    }
+
+    // ==========================================
+    // COACH CHAT & LIVE PLAN UPDATES
+    // ==========================================
+    async function handleChatImageSelect(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        currentChatImageBase64 = await compressImageFile(file);
+        document.getElementById('chat-preview-img').src = currentChatImageBase64;
+        document.getElementById('chat-image-preview').classList.remove('hidden');
+      } catch (e) {
+        alert("Erreur lors du chargement de l'image.");
+      }
+    }
+
+    function clearChatImage() {
+      currentChatImageBase64 = null;
+      document.getElementById('chat-image-input').value = '';
+      document.getElementById('chat-image-preview').classList.add('hidden');
+    }
+
+    function sendQuickPrompt(text) {
+      document.getElementById('chat-input').value = text;
+      handleChatSubmit(new Event('submit'));
+    }
+
+    async function handleChatSubmit(event) {
+      event.preventDefault();
+      const inputEl = document.getElementById('chat-input');
+      const text = inputEl.value.trim();
+      const img = currentChatImageBase64;
+
+      if (!text && !img) return;
+
+      const nowTime = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      state.chatHistory.push({
+        role: 'user',
+        text: text || "Analyse cette capture d'écran",
+        hasImage: !!img,
+        time: nowTime
+      });
+
+      inputEl.value = '';
+      clearChatImage();
+      saveState();
+      scrollChatToBottom();
+
+      const sendBtn = document.getElementById('chat-send-btn');
+      sendBtn.disabled = true;
+
+      try {
+        const activeWeekNum = computeCurrentCalendarWeek();
+        const contextSummary = JSON.stringify({
+          today: new Date().toISOString().split('T')[0],
+          currentCalendarWeek: activeWeekNum,
+          paces: state.paces,
+          program: state.program
+        });
+
+        const systemInstruction = `Tu es CoachPulse, un coach d'endurance et triathlon expert, direct, concret et empathique.
+Voici le contexte complet de l'athlète (date du jour, semaine calendaire en cours, allures cibles, programme multi-semaines) :
+${contextSummary}
+
+Tu DOIS répondre au format JSON strict suivant :
+{
+  "reply": "Ta réponse claire et motivante en français",
+  "proposedAction": null OU {
+    "type": "UPDATE_PACES" | "UPDATE_PROGRAM",
+    "summary": "Résumé court de la modification proposée (ex: Alléger les séances S2 et passer Semi à 4:40/km)",
+    "paces": { "hm": "...", "tenK": "...", "z2": "..." },
+    "updatedWeeks": [ ...copie complète et modifiée du tableau program.weeks si UPDATE_PROGRAM... ]
+  }
+}
+Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures ou de modifier/décaler/alléger des séances de son planning (ou si tu estimes de nouvelles allures suite à sa demande). Sinon mets "proposedAction": null.`;
+
+        const rawJson = await callGeminiAPI({
+          prompt: text || "Analyse cette capture d'écran d'entraînement et donne-moi ton retour.",
+          systemInstruction,
+          imageBase64: img,
+          responseMimeType: 'application/json'
+        });
+
+        const parsed = JSON.parse(rawJson);
+
+        state.chatHistory.push({
+          role: 'assistant',
+          text: parsed.reply || "Bien reçu.",
+          time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          action: parsed.proposedAction || null,
+          actionApplied: false
+        });
+      } catch (err) {
+        state.chatHistory.push({
+          role: 'assistant',
+          text: `⚠️ ${err.message}`,
+          time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+          action: null
+        });
+      } finally {
+        sendBtn.disabled = false;
+        saveState();
+        scrollChatToBottom();
+      }
+    }
+
+    function applyChatAction(msgIndex) {
+      const msg = state.chatHistory[msgIndex];
+      if (!msg || !msg.action || msg.actionApplied) return;
+
+      if (msg.action.type === 'UPDATE_PACES' && msg.action.paces) {
+        state.paces = { ...state.paces, ...msg.action.paces };
+      } else if (msg.action.type === 'UPDATE_PROGRAM' && Array.isArray(msg.action.updatedWeeks) && state.program) {
+        state.program.weeks = msg.action.updatedWeeks;
+      }
+
+      msg.actionApplied = true;
+      saveState();
+    }
+
+    function clearChat() {
+      if (confirm("Effacer l'historique du chat ?")) {
+        state.chatHistory = [defaultState.chatHistory[0]];
+        saveState();
+      }
+    }
+
+    // ==========================================
+    // GITHUB GIST SYNC & LOCAL JSON BACKUP
+    // ==========================================
+    async function syncToGitHubGist() {
+      const token = document.getElementById('settings-github-token').value.trim() || getGhToken();
+      const feedback = document.getElementById('gist-feedback');
+      if (!token) {
+        alert("Colle d'abord ton Token GitHub (avec la permission gist).");
+        return;
+      }
+      localStorage.setItem(GH_TOKEN_STORAGE, token);
+
+      feedback.classList.remove('hidden');
+      feedback.className = 'text-[11px] text-sky-400';
+      feedback.textContent = "Synchronisation vers GitHub Gist...";
+
+      try {
+        let gistId = getGhGistId();
+
+        // Search existing Gist if ID not stored locally
+        if (!gistId) {
+          const listRes = await fetch('https://api.github.com/gists', {
+            headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' }
+          });
+          if (!listRes.ok) throw new Error(`Erreur GitHub (${listRes.status}) : vérifie ton token.`);
+          const gists = await listRes.json();
+          const existing = gists.find(g => g.files && g.files['coachpulse-sync-backup.json']);
+          if (existing) {
+            gistId = existing.id;
+            localStorage.setItem(GH_GIST_ID_STORAGE, gistId);
+          }
+        }
+
+        const payload = {
+          description: 'CoachPulse Cloud Backup (Privé)',
+          public: false,
+          files: {
+            'coachpulse-sync-backup.json': {
+              content: JSON.stringify({
+                updatedAt: new Date().toISOString(),
+                state
+              }, null, 2)
+            }
+          }
+        };
+
+        const url = gistId ? `https://api.github.com/gists/${gistId}` : 'https://api.github.com/gists';
+        const method = gistId ? 'PATCH' : 'POST';
+
+        const res = await fetch(url, {
+          method,
+          headers: {
+            Authorization: `token ${token}`,
+            Accept: 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error(`Échec de l'envoi Gist (${res.status}).`);
+        const data = await res.json();
+        localStorage.setItem(GH_GIST_ID_STORAGE, data.id);
+
+        feedback.className = 'text-[11px] text-emerald-400';
+        feedback.textContent = `Sauvegardé sur GitHub à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} ✓`;
+        updateBadges();
+      } catch (err) {
+        feedback.className = 'text-[11px] text-rose-400';
+        feedback.textContent = err.message;
+      }
+    }
+
+    async function loadFromGitHubGist() {
+      const token = document.getElementById('settings-github-token').value.trim() || getGhToken();
+      const feedback = document.getElementById('gist-feedback');
+      if (!token) {
+        alert("Colle d'abord ton Token GitHub (avec la permission gist).");
+        return;
+      }
+      localStorage.setItem(GH_TOKEN_STORAGE, token);
+
+      feedback.classList.remove('hidden');
+      feedback.className = 'text-[11px] text-sky-400';
+      feedback.textContent = "Recherche de la sauvegarde sur GitHub...";
+
+      try {
+        let gistId = getGhGistId();
+        if (!gistId) {
+          const listRes = await fetch('https://api.github.com/gists', {
+            headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' }
+          });
+          if (!listRes.ok) throw new Error(`Erreur GitHub (${listRes.status}).`);
+          const gists = await listRes.json();
+          const existing = gists.find(g => g.files && g.files['coachpulse-sync-backup.json']);
+          if (!existing) throw new Error("Aucune sauvegarde coachpulse-sync-backup.json trouvée sur ce compte.");
+          gistId = existing.id;
+          localStorage.setItem(GH_GIST_ID_STORAGE, gistId);
+        }
+
+        const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+          headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' }
+        });
+        if (!res.ok) throw new Error(`Impossible de lire le Gist (${res.status}).`);
+        const data = await res.json();
+        const fileContent = data.files?.['coachpulse-sync-backup.json']?.content;
+        if (!fileContent) throw new Error("Fichier de sauvegarde vide ou introuvable.");
+
+        const parsed = JSON.parse(fileContent);
+        if (parsed.state) {
+          state = { ...JSON.parse(JSON.stringify(defaultState)), ...parsed.state };
+          saveState();
+          feedback.className = 'text-[11px] text-emerald-400';
+          feedback.textContent = "Données chargées depuis GitHub ✓";
+          updateBadges();
+        }
+      } catch (err) {
+        feedback.className = 'text-[11px] text-rose-400';
+        feedback.textContent = err.message;
+      }
+    }
+
+    function exportJsonBackup() {
+      const dataStr = JSON.stringify({ exportedAt: new Date().toISOString(), state }, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const dateStr = new Date().toISOString().split('T')[0];
+      a.href = url;
+      a.download = `coachpulse-backup-${dateStr}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function importJsonBackup(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          const restored = parsed.state || parsed;
+          if (!restored || typeof restored !== 'object') throw new Error("Format invalide");
+          state = { ...JSON.parse(JSON.stringify(defaultState)), ...restored };
+          saveState();
+          alert("Sauvegarde restaurée avec succès !");
+          closeModal('modal-settings');
+        } catch (err) {
+          alert("Fichier de sauvegarde invalide.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function resetAllData() {
+      if (confirm("Supprimer ton programme, ton historique et tes allures sur cet appareil ? (Ta clé API sera conservée)")) {
+        state = JSON.parse(JSON.stringify(defaultState));
+        saveState();
+        closeModal('modal-settings');
+      }
+    }
+
+    // ==========================================
+    // MODALS & NAVIGATION
+    // ==========================================
+    function switchTab(tab) {
+      ['plan', 'chat', 'history'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          btn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 font-semibold transition';
+        } else {
+          btn.className = 'flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition';
+        }
+      });
+      if (tab === 'chat') scrollChatToBottom();
+    }
+
+    function openImportModal() {
+      document.getElementById('import-start-date').value = state.program?.startDate || getMondayOfCurrentWeek();
+      document.getElementById('import-status').classList.add('hidden');
+      document.getElementById('modal-import').classList.remove('hidden');
+    }
+
+    function openSettings() {
+      document.getElementById('settings-api-key').value = getApiKey();
+      document.getElementById('settings-github-token').value = getGhToken();
+      document.getElementById('gist-feedback').classList.add('hidden');
+      document.getElementById('modal-settings').classList.remove('hidden');
+    }
+
+    function saveSettings() {
+      const apiKey = document.getElementById('settings-api-key').value.trim();
+      const ghToken = document.getElementById('settings-github-token').value.trim();
+      if (apiKey) localStorage.setItem(API_KEY_STORAGE, apiKey);
+      else localStorage.removeItem(API_KEY_STORAGE);
+
+      if (ghToken) localStorage.setItem(GH_TOKEN_STORAGE, ghToken);
+      else localStorage.removeItem(GH_TOKEN_STORAGE);
+
+      updateBadges();
+      closeModal('modal-settings');
+    }
+
+    function openPacesModal() {
+      document.getElementById('input-pace-hm').value = state.paces.hm;
+      document.getElementById('input-pace-10k').value = state.paces.tenK;
+      document.getElementById('input-pace-z2').value = state.paces.z2;
+      document.getElementById('modal-paces').classList.remove('hidden');
+    }
+
+    function savePaces() {
+      state.paces.hm = document.getElementById('input-pace-hm').value.trim() || '--:-- /km';
+      state.paces.tenK = document.getElementById('input-pace-10k').value.trim() || '--:-- /km';
+      state.paces.z2 = document.getElementById('input-pace-z2').value.trim() || '--:-- /km';
+      saveState();
+      closeModal('modal-paces');
+    }
+
+    function openStartDateModal() {
+      document.getElementById('input-start-date').value = state.program?.startDate || getMondayOfCurrentWeek();
+      document.getElementById('modal-startdate').classList.remove('hidden');
+    }
+
+    function saveStartDate() {
+      const val = document.getElementById('input-start-date').value;
+      if (val && state.program) {
+        state.program.startDate = val;
+        state.selectedWeek = computeCurrentCalendarWeek();
+        saveState();
+      }
+      closeModal('modal-startdate');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function scrollChatToBottom() {
+      const box = document.getElementById('chat-messages');
+      if (box) box.scrollTop = box.scrollHeight;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // ==========================================
+    // RENDERING
+    // ==========================================
+    function updateBadges() {
+      const badge = document.getElementById('api-badge');
+      if (getApiKey()) {
+        badge.textContent = 'Gemini 3.8 ✓';
+        badge.className = 'text-[10px] font-semibold px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30';
+      } else {
+        badge.textContent = 'Clé requise';
+        badge.className = 'text-[10px] font-semibold px-2 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30';
+      }
+
+      const gistBadge = document.getElementById('gist-status-badge');
+      if (gistBadge) {
+        if (getGhGistId()) {
+          gistBadge.textContent = 'Gist lié ✓';
+          gistBadge.className = 'text-[10px] text-emerald-400 font-semibold';
+        } else if (getGhToken()) {
+          gistBadge.textContent = 'Token prêt';
+          gistBadge.className = 'text-[10px] text-sky-400';
+        } else {
+          gistBadge.textContent = 'Non connecté';
+          gistBadge.className = 'text-[10px] text-slate-400';
+        }
+      }
+    }
+
+    function getSportBadgeStyle(sport) {
+      const s = (sport || '').toLowerCase();
+      if (s.includes('vélo') || s.includes('velo') || s.includes('cycl')) return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
+      if (s.includes('course') || s.includes('run') || s.includes('cap')) return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+      if (s.includes('nat') || s.includes('swim') || s.includes('piscine')) return 'bg-sky-500/15 text-sky-300 border-sky-500/30';
+      if (s.includes('renfo') || s.includes('kb') || s.includes('muscu')) return 'bg-purple-500/15 text-purple-300 border-purple-500/30';
+      return 'bg-slate-700/60 text-slate-300 border-slate-600';
+    }
+
+    function renderPlan() {
+      document.getElementById('pace-hm').textContent = state.paces.hm;
+      document.getElementById('pace-10k').textContent = state.paces.tenK;
+      document.getElementById('pace-z2').textContent = state.paces.z2;
+
+      const emptyEl = document.getElementById('empty-plan-state');
+      const activeEl = document.getElementById('active-plan-container');
+
+      if (!state.program || !state.program.weeks || state.program.weeks.length === 0) {
+        emptyEl.classList.remove('hidden');
+        activeEl.classList.add('hidden');
+        return;
+      }
+
+      emptyEl.classList.add('hidden');
+      activeEl.classList.remove('hidden');
+
+      const currentCalWeek = computeCurrentCalendarWeek();
+      if (!state.selectedWeek || state.selectedWeek > state.program.weeks.length) {
+        state.selectedWeek = currentCalWeek;
+      }
+
+      document.getElementById('program-title').textContent = state.program.title;
+      const isCurrent = state.selectedWeek === currentCalWeek;
+      document.getElementById('cycle-badge').textContent = isCurrent
+        ? `Semaine ${state.selectedWeek} · En cours`
+        : `Semaine ${state.selectedWeek} / ${state.program.weeks.length}`;
+      document.getElementById('week-dates-label').textContent = getWeekDateRangeLabel(state.selectedWeek);
+
+      // Render week tabs
+      const tabsEl = document.getElementById('week-tabs');
+      tabsEl.innerHTML = state.program.weeks.map(w => {
+        const active = w.weekNumber === state.selectedWeek;
+        const calDot = w.weekNumber === currentCalWeek ? ' •' : '';
+        return `<button onclick="selectWeek(${w.weekNumber})" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+          active
+            ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
+            : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
+        }">S${w.weekNumber}${calDot}</button>`;
+      }).join('');
+
+      // Render current week sessions
+      const weekObj = state.program.weeks.find(w => w.weekNumber === state.selectedWeek) || state.program.weeks[0];
+      const sessions = weekObj.sessions || [];
+      const doneCount = sessions.filter(s => s.completed).length;
+      const pct = sessions.length ? Math.round((doneCount / sessions.length) * 100) : 0;
+
+      document.getElementById('progress-text').textContent = `${doneCount}/${sessions.length} validées`;
+      document.getElementById('progress-bar').style.width = `${pct}%`;
+
+      const listEl = document.getElementById('sessions-list');
+      listEl.innerHTML = sessions.map(s => `
+        <div class="glass-card rounded-2xl p-4 transition ${s.completed ? 'opacity-75 border-emerald-500/30' : ''}">
+          <div class="flex items-start gap-3">
+            <button onclick="toggleSessionCheck('${s.id}')" class="check-pop mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center border-2 transition shrink-0 ${
+              s.completed
+                ? 'bg-emerald-500 border-emerald-500 text-slate-950'
+                : 'border-slate-600 hover:border-emerald-400 bg-slate-900/60'
+            }">
+              ${s.completed ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : ''}
+            </button>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span class="text-xs font-bold text-slate-300">${escapeHtml(s.day)}</span>
+                <div class="flex items-center gap-1.5">
+                  ${s.duration ? `<span class="text-[11px] text-slate-400 font-medium">${escapeHtml(s.duration)}</span>` : ''}
+                  <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full border ${getSportBadgeStyle(s.sport)}">${escapeHtml(s.sport)}</span>
+                </div>
+              </div>
+              <h4 class="text-sm font-bold text-white mt-1 ${s.completed ? 'line-through text-slate-400' : ''}">${escapeHtml(s.title)}</h4>
+              ${s.details ? `<p class="text-xs text-slate-400 mt-1 leading-relaxed">${escapeHtml(s.details)}</p>` : ''}
+              ${s.completed ? `
+                <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
+                  <span class="text-emerald-400 font-semibold">✓ ${escapeHtml(s.rpe || 'Validée')}</span>
+                  <button onclick="openDebriefModal('${s.id}')" class="text-slate-400 hover:text-white underline">Voir / Modifier débrief</button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectWeek(weekNum) {
+      state.selectedWeek = weekNum;
+      saveState();
+    }
+
+    function renderChat() {
+      const box = document.getElementById('chat-messages');
+      box.innerHTML = state.chatHistory.map((m, idx) => {
+        const isUser = m.role === 'user';
+        return `
+          <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'}">
+            <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs leading-relaxed ${
+              isUser
+                ? 'bg-emerald-500 text-slate-950 font-medium rounded-br-sm'
+                : 'glass-card text-slate-200 rounded-bl-sm'
+            }">
+              ${m.hasImage ? '<div class="text-[10px] font-bold opacity-80 mb-1">📷 Capture d'écran jointe</div>' : ''}
+              <div>${escapeHtml(m.text).replace(/
+/g, '<br>')}</div>
+              ${m.action ? `
+                <div class="mt-2.5 p-2.5 rounded-xl bg-slate-950/70 border border-emerald-500/40 space-y-2">
+                  <div class="text-[11px] font-bold text-emerald-400">⚡ Proposition de mise à jour</div>
+                  <div class="text-[11px] text-slate-300">${escapeHtml(m.action.summary || 'Appliquer les changements au planning')}</div>
+                  <button onclick="applyChatAction(${idx})" ${m.actionApplied ? 'disabled' : ''} class="w-full py-1.5 rounded-lg text-[11px] font-bold transition ${
+                    m.actionApplied
+                      ? 'bg-slate-800 text-emerald-400 cursor-default'
+                      : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                  }">
+                    ${m.actionApplied ? '✓ Appliqué au planning' : 'Appliquer au planning'}
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+            <span class="text-[10px] text-slate-500 mt-1 px-1">${escapeHtml(m.time || '')}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderHistory() {
+      const completed = [];
+      if (state.program?.weeks) {
+        state.program.weeks.forEach(w => {
+          w.sessions.forEach(s => {
+            if (s.completed) completed.push({ ...s, weekNumber: w.weekNumber });
+          });
+        });
+      }
+
+      document.getElementById('tab-history-label').textContent = `Historique (${completed.length})`;
+      const listEl = document.getElementById('history-list');
+
+      if (completed.length === 0) {
+        listEl.innerHTML = `<div class="glass-card rounded-2xl p-6 text-center text-xs text-slate-400">Aucune séance validée pour le moment.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = completed.reverse().map(s => `
+        <div class="glass-card rounded-2xl p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-bold text-emerald-400">S${s.weekNumber} · ${escapeHtml(s.day)} (${escapeHtml(s.completedAt || '')})</span>
+            <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">${escapeHtml(s.rpe || 'Validée')}</span>
+          </div>
+          <h4 class="text-sm font-bold text-white">${escapeHtml(s.title)}</h4>
+          ${s.notes ? `<p class="text-xs text-slate-300 bg-slate-900/70 rounded-xl p-2.5">« ${escapeHtml(s.notes)} »</p>` : ''}
+          ${s.aiFeedback ? `<div class="text-xs text-slate-300 border-l-2 border-emerald-500 pl-2.5 leading-relaxed">${escapeHtml(s.aiFeedback).replace(/
+/g, '<br>')}</div>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function renderAll() {
+      updateBadges();
+      renderPlan();
+      renderChat();
+      renderHistory();
+    }
+
+    // Initial boot
+    if (state.program) {
+      state.selectedWeek = computeCurrentCalendarWeek();
+    }
+    renderAll();
+  </script>
+</body>
+</html>
