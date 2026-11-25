@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#0b111e" />
-  <title>CoachPulse — Suivi & Coach IA Adaptatif</title>
+  <title>CoachPulse — Suivi &amp; Coach IA Adaptatif</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
@@ -52,7 +52,7 @@
         <span id="api-badge" class="text-[10px] font-semibold px-2 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
           Clé requise
         </span>
-        <button onclick="openSettings()" aria-label="Réglages" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">
+        <button type="button" onclick="openSettings()" aria-label="Réglages" class="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -67,11 +67,10 @@
 
     <!-- VIEW 1: PLANNING -->
     <section id="view-plan" class="space-y-4">
-      <!-- Target Paces Banner -->
       <div class="glass-card rounded-2xl p-3.5">
         <div class="flex items-center justify-between mb-2.5">
           <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Allures Cibles Actuelles</span>
-          <button onclick="openPacesModal()" class="text-xs font-medium text-emerald-400 hover:text-emerald-300">Modifier</button>
+          <button type="button" onclick="openPacesModal()" class="text-xs font-medium text-emerald-400 hover:text-emerald-300">Modifier</button>
         </div>
         <div class="grid grid-cols-3 gap-2 text-center">
           <div class="bg-slate-900/80 rounded-xl p-2 border border-slate-800">
@@ -89,7 +88,6 @@
         </div>
       </div>
 
-      <!-- Empty State -->
       <div id="empty-plan-state" class="glass-card rounded-2xl p-6 text-center space-y-4">
         <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -103,16 +101,15 @@
           </p>
         </div>
         <div class="flex flex-col sm:flex-row gap-2.5 justify-center">
-          <button onclick="openImportModal()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20">
+          <button type="button" onclick="openImportModal()" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition shadow-lg shadow-emerald-500/20">
             + Importer mon programme
           </button>
-          <button onclick="openSettings()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
+          <button type="button" onclick="openSettings()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition">
             Configurer Clé / GitHub
           </button>
         </div>
       </div>
 
-      <!-- Active Program Container -->
       <div id="active-plan-container" class="hidden space-y-4">
         <div class="glass-card rounded-2xl p-4 space-y-3">
           <div class="flex items-start justify-between gap-2">
@@ -123,20 +120,18 @@
               <h2 id="program-title" class="text-base font-bold text-white mt-1.5">Mon Programme</h2>
               <div class="flex items-center gap-2 mt-1">
                 <span id="week-dates-label" class="text-xs text-slate-400"></span>
-                <button onclick="openStartDateModal()" class="text-[11px] text-sky-400 hover:text-sky-300 underline">Changer début</button>
+                <button type="button" onclick="openStartDateModal()" class="text-[11px] text-sky-400 hover:text-sky-300 underline">Changer début</button>
               </div>
             </div>
-            <button onclick="openImportModal()" title="Importer un nouveau programme" class="p-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/20">
+            <button type="button" onclick="openImportModal()" title="Importer un nouveau programme" class="p-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition shadow-lg shadow-emerald-500/20">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
               </svg>
             </button>
           </div>
 
-          <!-- Week Selector Tabs -->
           <div id="week-tabs" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1"></div>
 
-          <!-- Progress Bar -->
           <div class="pt-1">
             <div class="flex justify-between text-xs mb-1">
               <span class="text-slate-400">Progression de la semaine</span>
@@ -148,7 +143,6 @@
           </div>
         </div>
 
-        <!-- Sessions List -->
         <div id="sessions-list" class="space-y-3"></div>
       </div>
     </section>
@@ -167,32 +161,28 @@
             <div class="text-[11px] text-slate-400">Prêt à estimer tes allures ou adapter ton planning</div>
           </div>
         </div>
-        <button onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-200 px-2 py-1">Vider</button>
+        <button type="button" onclick="clearChat()" class="text-xs text-slate-400 hover:text-slate-200 px-2 py-1">Vider</button>
       </div>
 
-      <!-- Chat Messages -->
       <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 pr-1 pb-2"></div>
 
-      <!-- Quick Prompts -->
       <div class="flex gap-2 overflow-x-auto no-scrollbar py-2">
-        <button onclick="sendQuickPrompt('Estime mon allure cible semi-marathon et 10 km en fonction de mes dernières séances.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
+        <button type="button" onclick="sendQuickPrompt('Estime mon allure cible semi-marathon et 10 km en fonction de mes dernières séances.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
           ⏱️ Estimer mon allure Semi
         </button>
-        <button onclick="sendQuickPrompt('Je me sens fatigué cette semaine, allège mes prochaines séances tout en gardant le rythme.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
+        <button type="button" onclick="sendQuickPrompt('Je me sens fatigué cette semaine, allège mes prochaines séances tout en gardant le rythme.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
           🔋 Adapter semaine (fatigue)
         </button>
-        <button onclick="sendQuickPrompt('Décale ma prochaine séance de 24h et réajuste la semaine.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
+        <button type="button" onclick="sendQuickPrompt('Décale ma prochaine séance de 24h et réajuste la semaine.')" class="shrink-0 text-xs bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-full border border-slate-700">
           📅 Décaler une séance
         </button>
       </div>
 
-      <!-- Image Preview in Chat -->
       <div id="chat-image-preview" class="hidden mb-2 relative inline-block w-fit">
         <img id="chat-preview-img" src="" alt="Aperçu" class="h-16 rounded-xl border border-emerald-500/50 object-cover" />
-        <button onclick="clearChatImage()" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500 text-white text-xs flex items-center justify-center font-bold">×</button>
+        <button type="button" onclick="clearChatImage()" class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-rose-500 text-white text-xs flex items-center justify-center font-bold">×</button>
       </div>
 
-      <!-- Input Bar -->
       <form onsubmit="handleChatSubmit(event)" class="flex items-center gap-2 pt-1">
         <label class="p-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 cursor-pointer border border-slate-700 transition">
           <input type="file" id="chat-image-input" accept="image/*" class="hidden" onchange="handleChatImageSelect(event)" />
@@ -223,21 +213,21 @@
   <!-- BOTTOM NAVIGATION -->
   <nav class="fixed bottom-0 inset-x-0 z-30 glass-card border-t border-slate-800/80 safe-bottom">
     <div class="max-w-lg mx-auto grid grid-cols-3 px-2 py-1.5">
-      <button onclick="switchTab('plan')" id="tab-plan" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 font-semibold transition">
+      <button type="button" onclick="switchTab('plan')" id="tab-plan" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-emerald-400 font-semibold transition">
         <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
         </svg>
         <span class="text-[11px]">Programme</span>
       </button>
 
-      <button onclick="switchTab('chat')" id="tab-chat" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
+      <button type="button" onclick="switchTab('chat')" id="tab-chat" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
         <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
         </svg>
         <span class="text-[11px]">Coach Chat</span>
       </button>
 
-      <button onclick="switchTab('history')" id="tab-history" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
+      <button type="button" onclick="switchTab('history')" id="tab-history" class="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-400 hover:text-slate-200 transition">
         <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
         </svg>
@@ -251,7 +241,7 @@
     <div class="glass-card w-full max-w-lg rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-bold text-white">Importer un programme</h3>
-        <button onclick="closeModal('modal-import')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+        <button type="button" onclick="closeModal('modal-import')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
       </div>
       <div class="space-y-3">
         <div>
@@ -269,8 +259,8 @@
       </div>
       <div id="import-status" class="hidden text-xs text-emerald-400 font-medium"></div>
       <div class="flex gap-2 pt-1">
-        <button onclick="closeModal('modal-import')" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Annuler</button>
-        <button id="import-submit-btn" onclick="processProgramImport()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
+        <button type="button" onclick="closeModal('modal-import')" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold">Annuler</button>
+        <button type="button" id="import-submit-btn" onclick="processProgramImport()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
           Analyser &amp; Créer
         </button>
       </div>
@@ -285,7 +275,7 @@
           <span class="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Validation &amp; Débrief</span>
           <h3 id="debrief-session-title" class="text-base font-bold text-white mt-0.5">Séance</h3>
         </div>
-        <button onclick="closeModal('modal-debrief')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+        <button type="button" onclick="closeModal('modal-debrief')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
       </div>
 
       <div class="space-y-3">
@@ -320,32 +310,30 @@
       <div id="debrief-ai-feedback" class="hidden rounded-2xl bg-slate-900/90 border border-emerald-500/30 p-3 text-xs text-slate-200 leading-relaxed"></div>
 
       <div class="flex gap-2 pt-1">
-        <button onclick="saveDebriefOnly()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
+        <button type="button" onclick="saveDebriefOnly()" class="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold">
           Valider sans IA
         </button>
-        <button id="debrief-ai-btn" onclick="submitDebriefWithAI()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
+        <button type="button" id="debrief-ai-btn" onclick="submitDebriefWithAI()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
           Valider &amp; Analyser IA
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: SETTINGS (API, GITHUB GIST SYNC, JSON BACKUP) -->
+  <!-- MODAL: SETTINGS -->
   <div id="modal-settings" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4">
     <div class="glass-card w-full max-w-lg rounded-3xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-bold text-white">Réglages &amp; Sauvegardes</h3>
-        <button onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+        <button type="button" onclick="closeModal('modal-settings')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
       </div>
 
-      <!-- Gemini API Key -->
       <div class="space-y-1.5">
         <label class="block text-xs font-semibold text-slate-300">Clé API Gemini (Google AI Studio)</label>
         <input id="settings-api-key" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
-        <p class="text-[11px] text-slate-400">Modèle utilisé : <code class="text-emerald-400">gemini-3.8-flash</code>. Stockée uniquement sur ton appareil.</p>
+        <p class="text-[11px] text-slate-400">Modèles : <code class="text-emerald-400">gemini-3.8-flash</code> puis bascule auto <code class="text-sky-400">gemini-2.5-flash</code> si surcharge.</p>
       </div>
 
-      <!-- GitHub Gist Cloud Sync -->
       <div class="border-t border-slate-800 pt-3 space-y-2">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold text-white">Cloud GitHub (iPhone ↔ Mac)</span>
@@ -353,21 +341,20 @@
         </div>
         <input id="settings-github-token" type="password" placeholder="Token GitHub (ghp_... avec permission gist)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="syncToGitHubGist()" id="btn-gist-push" class="py-2 px-3 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-semibold transition">
+          <button type="button" onclick="syncToGitHubGist()" id="btn-gist-push" class="py-2 px-3 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/40 text-sky-300 text-xs font-semibold transition">
             ☁️ Sauvegarder
           </button>
-          <button onclick="loadFromGitHubGist()" id="btn-gist-pull" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition">
+          <button type="button" onclick="loadFromGitHubGist()" id="btn-gist-pull" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition">
             📥 Charger
           </button>
         </div>
         <p id="gist-feedback" class="hidden text-[11px] text-emerald-400"></p>
       </div>
 
-      <!-- Local JSON Backup -->
       <div class="border-t border-slate-800 pt-3 space-y-2">
         <span class="block text-xs font-bold text-white">Sauvegarde fichier local (.json)</span>
         <div class="grid grid-cols-2 gap-2">
-          <button onclick="exportJsonBackup()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition">
+          <button type="button" onclick="exportJsonBackup()" class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold transition">
             Exporter (.json)
           </button>
           <label class="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold text-center cursor-pointer transition">
@@ -377,12 +364,11 @@
         </div>
       </div>
 
-      <!-- Actions -->
       <div class="border-t border-slate-800 pt-3 flex items-center justify-between gap-2">
-        <button onclick="resetAllData()" class="py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold">
+        <button type="button" onclick="resetAllData()" class="py-2 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 text-xs font-semibold">
           Réinitialiser données
         </button>
-        <button onclick="saveSettings()" class="py-2.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
+        <button type="button" onclick="saveSettings()" class="py-2.5 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold">
           Enregistrer
         </button>
       </div>
@@ -394,7 +380,7 @@
     <div class="glass-card w-full max-w-sm rounded-3xl p-5 space-y-4">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-bold text-white">Allures Cibles</h3>
-        <button onclick="closeModal('modal-paces')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+        <button type="button" onclick="closeModal('modal-paces')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
       </div>
       <div class="space-y-3">
         <div>
@@ -410,7 +396,7 @@
           <input id="input-pace-z2" type="text" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white" />
         </div>
       </div>
-      <button onclick="savePaces()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold">Enregistrer</button>
+      <button type="button" onclick="savePaces()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold">Enregistrer</button>
     </div>
   </div>
 
@@ -419,10 +405,10 @@
     <div class="glass-card w-full max-w-sm rounded-3xl p-5 space-y-4">
       <div class="flex items-center justify-between">
         <h3 class="text-base font-bold text-white">Date de début du programme</h3>
-        <button onclick="closeModal('modal-startdate')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
+        <button type="button" onclick="closeModal('modal-startdate')" class="text-slate-400 hover:text-white text-xl leading-none">×</button>
       </div>
       <input id="input-start-date" type="date" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-sm text-white" />
-      <button onclick="saveStartDate()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold">Mettre à jour</button>
+      <button type="button" onclick="saveStartDate()" class="w-full py-2.5 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold">Mettre à jour</button>
     </div>
   </div>
 
@@ -431,7 +417,7 @@
     const API_KEY_STORAGE = 'coachpulse_gemini_api_key';
     const GH_TOKEN_STORAGE = 'coachpulse_github_token';
     const GH_GIST_ID_STORAGE = 'coachpulse_github_gist_id';
-    const GEMINI_MODEL = 'gemini-3.8-flash';
+    const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash'];
 
     function getMondayOfCurrentWeek() {
       const d = new Date();
@@ -531,51 +517,43 @@
       }
 
       const parts = [];
-      if (prompt) {
-        parts.push({ text: prompt });
-      }
+      if (prompt) parts.push({ text: prompt });
       if (imageBase64) {
         const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
-        parts.push({
-          inlineData: {
-            mimeType: 'image/jpeg',
-            data: base64Data
-          }
+        parts.push({ inlineData: { mimeType: 'image/jpeg', data: base64Data } });
+      }
+
+      const body = { contents: [{ role: 'user', parts }] };
+      if (systemInstruction) body.systemInstruction = { parts: [{ text: systemInstruction }] };
+      if (responseMimeType) body.generationConfig = { responseMimeType };
+
+      let lastError = null;
+
+      for (const model of GEMINI_MODELS) {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
         });
-      }
 
-      const body = {
-        contents: [{ role: 'user', parts }]
-      };
+        const data = await response.json().catch(() => ({}));
 
-      if (systemInstruction) {
-        body.systemInstruction = { parts: [{ text: systemInstruction }] };
-      }
+        if (response.ok) {
+          const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+          if (!text) throw new Error(`Réponse vide reçue de ${model}.`);
+          return text;
+        }
 
-      if (responseMimeType) {
-        body.generationConfig = { responseMimeType };
-      }
-
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
         const errMsg = data?.error?.message || response.statusText || 'Erreur inconnue';
-        throw new Error(`Erreur API Gemini : HTTP ${response.status} (${GEMINI_MODEL}) : ${errMsg}`);
+        lastError = new Error(`Erreur API Gemini : HTTP ${response.status} (${model}) : ${errMsg}`);
+
+        if (response.status !== 503 && response.status !== 429) {
+          throw lastError;
+        }
       }
 
-      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
-      if (!text) {
-        throw new Error(`Réponse vide reçue de ${GEMINI_MODEL}.`);
-      }
-      return text;
+      throw lastError;
     }
 
     function computeCurrentCalendarWeek() {
@@ -640,7 +618,7 @@ Transforme le texte fourni par l'utilisateur en un objet JSON strict respectant 
 Si le texte ne précise pas de numéro de semaine, regroupe toutes les séances dans weekNumber: 1. Réponds uniquement en JSON valide.`;
 
         const jsonStr = await callGeminiAPI({
-          prompt: "Programme à structurer :\n\n" + rawText,
+          prompt: `Programme à structurer :\n\n${rawText}`,
           systemInstruction: systemPrompt,
           responseMimeType: 'application/json'
         });
@@ -797,7 +775,7 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
         session.completedAt = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
         saveState();
 
-        feedbackBox.innerHTML = `<div class="font-bold text-emerald-400 mb-1">Retour du Coach :</div><div>${formatMultiline(aiReply)}</div>`;
+        feedbackBox.innerHTML = `<div class="font-bold text-emerald-400 mb-1">Retour du Coach :</div><div>${escapeHtml(aiReply).replace(/\n/g, '<br>')}</div>`;
         btn.textContent = "Terminé ✓";
         setTimeout(() => closeModal('modal-debrief'), 1800);
       } catch (err) {
@@ -1176,10 +1154,6 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
         .replace(/"/g, '&quot;');
     }
 
-    function formatMultiline(str) {
-      return escapeHtml(str).split(/\r?\n/).join('<br>');
-    }
-
     function updateBadges() {
       const badge = document.getElementById('api-badge');
       if (getApiKey()) {
@@ -1247,7 +1221,7 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
       tabsEl.innerHTML = state.program.weeks.map(w => {
         const active = w.weekNumber === state.selectedWeek;
         const calDot = w.weekNumber === currentCalWeek ? ' •' : '';
-        return `<button onclick="selectWeek(${w.weekNumber})" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
+        return `<button type="button" onclick="selectWeek(${w.weekNumber})" class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition ${
           active
             ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20'
             : 'bg-slate-900/90 text-slate-400 hover:text-slate-200 border border-slate-800'
@@ -1266,7 +1240,7 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
       listEl.innerHTML = sessions.map(s => `
         <div class="glass-card rounded-2xl p-4 transition ${s.completed ? 'opacity-75 border-emerald-500/30' : ''}">
           <div class="flex items-start gap-3">
-            <button onclick="toggleSessionCheck('${s.id}')" class="check-pop mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center border-2 transition shrink-0 ${
+            <button type="button" onclick="toggleSessionCheck('${s.id}')" class="check-pop mt-0.5 w-6 h-6 rounded-lg flex items-center justify-center border-2 transition shrink-0 ${
               s.completed
                 ? 'bg-emerald-500 border-emerald-500 text-slate-950'
                 : 'border-slate-600 hover:border-emerald-400 bg-slate-900/60'
@@ -1286,7 +1260,7 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
               ${s.completed ? `
                 <div class="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
                   <span class="text-emerald-400 font-semibold">✓ ${escapeHtml(s.rpe || 'Validée')}</span>
-                  <button onclick="openDebriefModal('${s.id}')" class="text-slate-400 hover:text-white underline">Voir / Modifier débrief</button>
+                  <button type="button" onclick="openDebriefModal('${s.id}')" class="text-slate-400 hover:text-white underline">Voir / Modifier débrief</button>
                 </div>
               ` : ''}
             </div>
@@ -1311,13 +1285,13 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
                 ? 'bg-emerald-500 text-slate-950 font-medium rounded-br-sm'
                 : 'glass-card text-slate-200 rounded-bl-sm'
             }">
-              ${m.hasImage ? '<div class="text-[10px] font-bold opacity-80 mb-1">📷 Capture d\'écran jointe</div>' : ''}
-              <div>${formatMultiline(m.text)}</div>
+              ${m.hasImage ? `<div class="text-[10px] font-bold opacity-80 mb-1">📷 Capture d'écran jointe</div>` : ''}
+              <div>${escapeHtml(m.text).replace(/\n/g, '<br>')}</div>
               ${m.action ? `
                 <div class="mt-2.5 p-2.5 rounded-xl bg-slate-950/70 border border-emerald-500/40 space-y-2">
                   <div class="text-[11px] font-bold text-emerald-400">⚡ Proposition de mise à jour</div>
                   <div class="text-[11px] text-slate-300">${escapeHtml(m.action.summary || 'Appliquer les changements au planning')}</div>
-                  <button onclick="applyChatAction(${idx})" ${m.actionApplied ? 'disabled' : ''} class="w-full py-1.5 rounded-lg text-[11px] font-bold transition ${
+                  <button type="button" onclick="applyChatAction(${idx})" ${m.actionApplied ? 'disabled' : ''} class="w-full py-1.5 rounded-lg text-[11px] font-bold transition ${
                     m.actionApplied
                       ? 'bg-slate-800 text-emerald-400 cursor-default'
                       : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
@@ -1359,7 +1333,7 @@ Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures o
           </div>
           <h4 class="text-sm font-bold text-white">${escapeHtml(s.title)}</h4>
           ${s.notes ? `<p class="text-xs text-slate-300 bg-slate-900/70 rounded-xl p-2.5">« ${escapeHtml(s.notes)} »</p>` : ''}
-          ${s.aiFeedback ? `<div class="text-xs text-slate-300 border-l-2 border-emerald-500 pl-2.5 leading-relaxed">${formatMultiline(s.aiFeedback)}</div>` : ''}
+          ${s.aiFeedback ? `<div class="text-xs text-slate-300 border-l-2 border-emerald-500 pl-2.5 leading-relaxed">${escapeHtml(s.aiFeedback).replace(/\n/g, '<br>')}</div>` : ''}
         </div>
       `).join('');
     }
