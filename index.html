@@ -431,7 +431,8 @@
     const API_KEY_STORAGE = 'coachpulse_gemini_api_key';
     const GH_TOKEN_STORAGE = 'coachpulse_github_token';
     const GH_GIST_ID_STORAGE = 'coachpulse_github_gist_id';
-    const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-2.5-flash'];
+    const GEMINI_MODEL = 'gemini-3.8-flash';
+
     function getMondayOfCurrentWeek() {
       const d = new Date();
       const day = d.getDay();
@@ -523,51 +524,23 @@
       });
     }
 
-  async function callGeminiAPI({ prompt, systemInstruction = '', imageBase64 = null, responseMimeType = null }) {
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    throw new Error("Aucune clé API Gemini configurée. Ouvre la roue crantée en haut à droite pour coller ta clé.");
-  }
+    async function callGeminiAPI({ prompt, systemInstruction = '', imageBase64 = null, responseMimeType = null }) {
+      const apiKey = getApiKey();
+      if (!apiKey) {
+        throw new Error("Aucune clé API Gemini configurée. Ouvre la roue crantée en haut à droite pour coller ta clé.");
+      }
 
-  const parts = [];
-  if (prompt) parts.push({ text: prompt });
-  if (imageBase64) {
-    const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
-    parts.push({ inlineData: { mimeType: 'image/jpeg', data: base64Data } });
-  }
-
-  const body = { contents: [{ role: 'user', parts }] };
-  if (systemInstruction) body.systemInstruction = { parts: [{ text: systemInstruction }] };
-  if (responseMimeType) body.generationConfig = { responseMimeType };
-
-  let lastError = null;
-
-  for (const model of GEMINI_MODELS) {
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-
-    const data = await response.json().catch(() => ({}));
-
-    if (response.ok) {
-      const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
-      if (!text) throw new Error(`Réponse vide reçue de ${model}.`);
-      return text;
-    }
-
-    const errMsg = data?.error?.message || response.statusText || 'Erreur inconnue';
-    lastError = new Error(`Erreur API Gemini : HTTP ${response.status} (${model}) : ${errMsg}`);
-
-    if (response.status !== 503 && response.status !== 429) {
-      throw lastError;
-    }
-  }
-
-  throw lastError;
-}
+      const parts = [];
+      if (prompt) {
+        parts.push({ text: prompt });
+      }
+      if (imageBase64) {
+        const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64;
+        parts.push({
+          inlineData: {
+            mimeType: 'image/jpeg',
+            data: base64Data
+          }
         });
       }
 
@@ -595,7 +568,8 @@
 
       if (!response.ok) {
         const errMsg = data?.error?.message || response.statusText || 'Erreur inconnue';
-        throw new Error(`Réponse vide reçue de ${GEMINI_MODELS[0]}.`);      }
+        throw new Error(`Erreur API Gemini : HTTP ${response.status} (${GEMINI_MODEL}) : ${errMsg}`);
+      }
 
       const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
       if (!text) {
