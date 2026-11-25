@@ -863,10 +863,10 @@
     function detectSportFromText(text) {
       const t = text.toLowerCase();
       if (/\b(vélo|velo|home[-\s]?trainer|ht|cycl|pma|ftp|braquet|rouleur|sortie longue vélo)\b/.test(t)) return 'Vélo';
-      if (/\b(course|cap|run|footing|fractionné|seuil|semi|10\s?km|5\s?km|ef|endurance fondamentale|piste|foulée|allure)\b/.test(t)) return 'Course';
       if (/\b(natation|swim|piscine|crawl|brasse|bassin|pull[-\s]?buoy|plaquettes|éducatifs)\b/.test(t)) return 'Natation';
       if (/\b(renfo|kettlebell|kb|gainage|muscu|ppg|swing|pompes|squat|abdos|core)\b/.test(t)) return 'Renfo';
-      return 'Autre';
+      if (/\b(course|cap|run|footing|fractionné|seuil|semi|21,1\s?km|10\s?km|5\s?km|ef|endurance fondamentale|sl|trot|piste|foulée|allure|as21|lignes droites|côte|bpm)\b/.test(t)) return 'Course';
+      return 'Course';
     }
 
     function extractDurationFromText(text) {
@@ -885,10 +885,10 @@
       let detectedTitle = customTitle || '';
       const weeksMap = new Map();
       let currentWeekNum = 1;
-      let currentSession = null;
 
-      const dayRegex = /^(?:[-•*>]\s*)?(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche|jour\s*\d+|j\d+)\b\s*[:\-–—]?\s*(.*)$/i;
-      const weekRegex = /^(?:#{1,4}\s*)?(?:semaine|week|sem\.?|s)\s*(\d+)\b(?:\s*[:\-–—(]\s*(.*))?$/i;
+      const weekRegex = /^(?:#{1,4}\s*)?(?:semaine|week|sem\.?|s)\s*(\d+)\b/i;
+      const bulletRegex = /^[-•*>]\s*(.+)$/;
+      const dayPrefixRegex = /^(lundi|mardi|mercredi|jeudi|vendredi|samedi|dimanche)(?:\s+\d{1,2}\/\d{1,2})?\s*[:\-–—]?\s*(.*)$/i;
 
       function ensureWeek(num) {
         if (!weeksMap.has(num)) {
@@ -897,29 +897,7 @@
         return weeksMap.get(num);
       }
 
-      function pushCurrentSession() {
-        if (!currentSession) return;
-        const wk = ensureWeek(currentSession.weekNumber);
-        const fullText = `${currentSession.title} ${currentSession.details}`;
-        wk.sessions.push({
-          id: `w${currentSession.weekNumber}_s${wk.sessions.length + 1}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-          day: currentSession.day,
-          sport: detectSportFromText(fullText),
-          title: currentSession.title || 'Séance',
-          duration: extractDurationFromText(fullText),
-          details: currentSession.details.trim(),
-          completed: false,
-          rpe: '',
-          notes: '',
-          aiFeedback: '',
-          completedAt: null
-        });
-        currentSession = null;
-      }
-
-      for (let i = 0; i < cleanedLines.length; i++) {
-        const line = cleanedLines[i];
-
+      for (const line of cleanedLines) {
         if (!detectedTitle && /^#\s+/.test(line) && !weekRegex.test(line)) {
           detectedTitle = line.replace(/^#+\s*/, '').trim();
           continue;
@@ -927,62 +905,57 @@
 
         const wMatch = line.match(weekRegex);
         if (wMatch) {
-          pushCurrentSession();
           currentWeekNum = parseInt(wMatch[1], 10) || currentWeekNum;
           ensureWeek(currentWeekNum);
           continue;
         }
 
-        const dMatch = line.match(dayRegex);
+        const bMatch = line.match(bulletRegex);
+        const content = bMatch ? bMatch[1].trim() : line;
+
+        const wk = ensureWeek(currentWeekNum);
+        const sessionIndex = wk.sessions.length + 1;
+
+        const dMatch = content.match(dayPrefixRegex);
+        let dayLabel;
+        let sessionTitle;
+
         if (dMatch) {
-          const rest = (dMatch[2] || '').trim();
-          if (/^repos\b/i.test(rest) && detectSportFromText(rest) === 'Autre') {
-            pushCurrentSession();
-            continue;
-          }
-          pushCurrentSession();
-          const dayLabel = dMatch[1].charAt(0).toUpperCase() + dMatch[1].slice(1).toLowerCase();
-          let titlePart = rest;
-          let detailPart = '';
-          const splitMatch = rest.match(/^([^:–—-]+?)\s*[:–—-]\s*(.+)$/);
-          if (splitMatch && splitMatch[1].length <= 65) {
-            titlePart = splitMatch[1].trim();
-            detailPart = splitMatch[2].trim();
-          }
-          currentSession = {
-            weekNumber: currentWeekNum,
-            day: dayLabel,
-            title: titlePart || `Séance ${dayLabel}`,
-            details: detailPart
-          };
+          dayLabel = dMatch[1].charAt(0).toUpperCase() + dMatch[1].slice(1).toLowerCase();
+          sessionTitle = (dMatch[2] || '').trim() || `Séance ${sessionIndex}`;
+        } else if (/^SL\b/i.test(content)) {
+          dayLabel = 'Sortie longue';
+          sessionTitle = content;
+        } else {
+          dayLabel = `Séance ${sessionIndex}`;
+          sessionTitle = content;
+        }
+
+        if (/^repos$/i.test(sessionTitle)) {
           continue;
         }
 
-        if (currentSession) {
-          const cleanBullet = line.replace(/^[-•*>]\s*/, '');
-          currentSession.details = currentSession.details
-            ? `${currentSession.details} · ${cleanBullet}`
-            : cleanBullet;
-        } else if (/^[-•*]\s*/.test(line)) {
-          const cleanBullet = line.replace(/^[-•*]\s*/, '');
-          const wk = ensureWeek(currentWeekNum);
-          currentSession = {
-            weekNumber: currentWeekNum,
-            day: `Séance ${wk.sessions.length + 1}`,
-            title: cleanBullet.slice(0, 60),
-            details: cleanBullet.length > 60 ? cleanBullet : ''
-          };
-        }
+        wk.sessions.push({
+          id: `w${currentWeekNum}_s${sessionIndex}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          day: dayLabel,
+          sport: detectSportFromText(sessionTitle),
+          title: sessionTitle,
+          duration: extractDurationFromText(sessionTitle),
+          details: '',
+          completed: false,
+          rpe: '',
+          notes: '',
+          aiFeedback: '',
+          completedAt: null
+        });
       }
-
-      pushCurrentSession();
 
       const weeks = Array.from(weeksMap.values())
         .sort((a, b) => a.weekNumber - b.weekNumber)
         .filter(w => w.sessions.length > 0);
 
       return {
-        title: detectedTitle || 'Mon Programme',
+        title: detectedTitle || 'Prépa Semi-Marathon de Nantes',
         weeks
       };
     }
