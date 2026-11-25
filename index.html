@@ -654,9 +654,19 @@
       }
     }
 
-    function saveState() {
+    let autoSyncTimer = null;
+    function scheduleAutoSync() {
+      if (!getGhToken()) return;
+      clearTimeout(autoSyncTimer);
+      autoSyncTimer = setTimeout(() => {
+        syncToGitHubGist(true);
+      }, 2000);
+    }
+
+    function saveState(skipAutoSync = false) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       renderAll();
+      if (!skipAutoSync) scheduleAutoSync();
     }
 
     function getApiKey() {
@@ -1108,6 +1118,9 @@ ${rawText}`,
       document.getElementById('debrief-image-label').textContent = "Ajouter une capture d'écran";
       document.getElementById('debrief-preview-img').classList.add('hidden');
       document.getElementById('debrief-ai-feedback').classList.add('hidden');
+      const aiBtn = document.getElementById('debrief-ai-btn');
+      aiBtn.textContent = "Valider & Analyser IA";
+      aiBtn.onclick = submitDebriefWithAI;
       selectRpe(currentDebriefRpe);
 
       document.getElementById('modal-debrief').classList.remove('hidden');
@@ -1185,8 +1198,8 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
         saveState();
 
         feedbackBox.innerHTML = `<div class="font-bold text-emerald-400 mb-1">Retour du Coach :</div><div>${escapeHtml(aiReply).replace(/\n/g, '<br>')}</div>`;
-        btn.textContent = "Terminé ✓";
-        setTimeout(() => closeModal('modal-debrief'), 1800);
+        btn.textContent = "Fermer ✓";
+        btn.onclick = () => closeModal('modal-debrief');
       } catch (err) {
         feedbackBox.innerHTML = `<span class="text-rose-400">⚠️ ${escapeHtml(err.message)}</span>`;
       } finally {
@@ -1245,13 +1258,48 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
       try {
         const activeWeekNum = computeCurrentCalendarWeek();
         const currentWeekData = state.program?.weeks?.find(w => w.weekNumber === activeWeekNum) || null;
+        const completedSessions = [];
+        if (state.program?.weeks) {
+          state.program.weeks.forEach(w => {
+            (w.sessions || []).forEach(s => {
+              if (s.completed) {
+                completedSessions.push({
+                  week: w.weekNumber,
+                  day: s.day,
+                  sport: s.sport,
+                  title: s.title,
+                  duration: s.duration,
+                  rpe: s.rpe,
+                  notes: s.notes,
+                  completedAt: s.completedAt
+                });
+              }
+            });
+          });
+        }
+        const recentCompleted = completedSessions.slice(-20);
+        const allWeeksOverview = (state.program?.weeks || []).map(w => ({
+          weekNumber: w.weekNumber,
+          sessions: (w.sessions || []).map(s => ({
+            day: s.day,
+            sport: s.sport,
+            title: s.title,
+            duration: s.duration,
+            completed: !!s.completed,
+            rpe: s.rpe || ''
+          }))
+        }));
         const contextSummary = JSON.stringify({
           today: new Date().toISOString().split('T')[0],
+          programTitle: state.program?.title || 'Aucun',
           paces: state.paces,
-          currentWeek: currentWeekData
+          currentWeekNumber: activeWeekNum,
+          currentWeek: currentWeekData,
+          recentCompletedSessions: recentCompleted,
+          allWeeksOverview: allWeeksOverview
         });
 
-        const systemInstruction = `Tu es CoachPulse, un coach d'endurance et triathlon expert, direct et concis. Contexte de la semaine en cours : ${contextSummary}. Réponds directement en français.`;
+        const systemInstruction = `Tu es CoachPulse, un coach d'endurance et triathlon expert, direct et concis. Tu as accès aux séances enregistrées (validées et planifiées) de l'athlète dans le contexte ci-dessous. Réponds directement en français en t'appuyant sur ces données réelles : ${contextSummary}.`;
 
         const replyText = await callGeminiAPI({
           prompt: text || "Analyse cette capture d'écran d'entraînement et donne-moi ton retour.",
@@ -1301,12 +1349,17 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
       }
     }
 
-    async function syncToGitHubGist() {
+    async function syncToGitHubGist(silent = false) {
       const token = document.getElementById('settings-github-token').value.trim() || getGhToken();
       const feedback = document.getElementById('gist-feedback');
+      const sub = document.getElementById('header-subtitle');
       if (!token) {
-        alert("Colle d'abord ton Token GitHub (avec la permission gist).");
+        if (!silent) alert("Colle d'abord ton Token GitHub (avec la permission gist).");
         return;
+      }
+      if (silent && sub) {
+        sub.textContent = 'Synchro GitHub...';
+        sub.className = 'text-[11px] text-sky-400 mt-0.5';
       }
       localStorage.setItem(GH_TOKEN_STORAGE, token);
 
@@ -1360,12 +1413,21 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
         const data = await res.json();
         localStorage.setItem(GH_GIST_ID_STORAGE, data.id);
 
+        const timeStr = new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
         feedback.className = 'text-[11px] text-emerald-400';
-        feedback.textContent = `Sauvegardé sur GitHub à ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })} ✓`;
+        feedback.textContent = `Sauvegardé sur GitHub à ${timeStr} ✓`;
+        if (sub) {
+          sub.textContent = `Synchro GitHub ✓ (${timeStr})`;
+          sub.className = 'text-[11px] text-emerald-400 mt-0.5';
+        }
         updateBadges();
       } catch (err) {
         feedback.className = 'text-[11px] text-rose-400';
         feedback.textContent = err.message;
+        if (silent && sub) {
+          sub.textContent = 'Erreur synchro GitHub';
+          sub.className = 'text-[11px] text-rose-400 mt-0.5';
+        }
       }
     }
 
@@ -1407,7 +1469,7 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
         const parsed = JSON.parse(fileContent);
         if (parsed.state) {
           state = { ...JSON.parse(JSON.stringify(defaultState)), ...parsed.state };
-          saveState();
+          saveState(true);
           feedback.className = 'text-[11px] text-emerald-400';
           feedback.textContent = "Données chargées depuis GitHub ✓";
           updateBadges();
@@ -1766,6 +1828,9 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
         state.selectedWeek = computeCurrentCalendarWeek();
       }
       renderAll();
+      if (getGhToken() && !state.program) {
+        loadFromGitHubGist();
+      }
       const sub = document.getElementById('header-subtitle');
       if (sub) {
         sub.textContent = 'Coach IA Actif · Prêt';
