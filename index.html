@@ -595,8 +595,7 @@
 
       if (!response.ok) {
         const errMsg = data?.error?.message || response.statusText || 'Erreur inconnue';
-        throw new Error(`Erreur API Gemini : HTTP ${response.status} (${GEMINI_MODEL}) : ${errMsg}`);
-      }
+        throw new Error(`Réponse vide reçue de ${GEMINI_MODELS[0]}.`);      }
 
       const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
       if (!text) {
