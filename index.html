@@ -1013,56 +1013,6 @@ Conserve les numéros de semaine indiqués dans le texte (ex: Semaine 3 -> weekN
         btn.textContent = "Analyser & Créer";
       }
     }
-  ]
-}
-Si le texte ne précise pas de numéro de semaine, regroupe toutes les séances dans weekNumber: 1. Réponds uniquement en JSON valide.`;
-
-        const jsonStr = await callGeminiAPI({
-          prompt: `Programme à structurer :\n\n${rawText}`,
-          systemInstruction: systemPrompt,
-          responseMimeType: 'application/json'
-        });
-
-        const parsed = JSON.parse(jsonStr);
-        if (!parsed.weeks || !Array.isArray(parsed.weeks) || parsed.weeks.length === 0) {
-          throw new Error("Aucune semaine détectée dans le programme.");
-        }
-
-        const formattedWeeks = parsed.weeks.map((w, wIdx) => ({
-          weekNumber: w.weekNumber || (wIdx + 1),
-          sessions: (w.sessions || []).map((s, sIdx) => ({
-            id: `w${wIdx + 1}_s${sIdx + 1}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
-            day: s.day || `Jour ${sIdx + 1}`,
-            sport: s.sport || 'Autre',
-            title: s.title || 'Séance',
-            duration: s.duration || '',
-            details: s.details || '',
-            completed: false,
-            rpe: '',
-            notes: '',
-            aiFeedback: '',
-            completedAt: null
-          }))
-        }));
-
-        state.program = {
-          title: titleInput || parsed.title || 'Mon Programme',
-          startDate,
-          weeks: formattedWeeks
-        };
-        state.selectedWeek = computeCurrentCalendarWeek();
-        saveState();
-
-        closeModal('modal-import');
-        document.getElementById('import-raw-text').value = '';
-      } catch (err) {
-        statusEl.className = 'text-xs text-rose-400 font-medium';
-        statusEl.textContent = err.message;
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "Analyser & Créer";
-      }
-    }
 
     function toggleSessionCheck(sessionId) {
       const session = findSessionById(sessionId);
@@ -1744,15 +1694,31 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
       renderHistory();
     }
 
+    window.onerror = function(msg, url, line) {
+      const sub = document.getElementById('header-subtitle');
+      if (sub) {
+        sub.textContent = 'Erreur JS L' + line + ': ' + msg;
+        sub.className = 'text-[11px] text-rose-400 mt-0.5';
+      }
+    };
+
     try {
       if (state.program) {
         state.selectedWeek = computeCurrentCalendarWeek();
       }
       renderAll();
+      const sub = document.getElementById('header-subtitle');
+      if (sub) {
+        sub.textContent = 'Coach IA Actif · Prêt';
+        sub.className = 'text-[11px] text-emerald-400 mt-0.5';
+      }
     } catch (bootErr) {
       console.error(bootErr);
       const sub = document.getElementById('header-subtitle');
-      if (sub) sub.textContent = 'Erreur JS: ' + bootErr.message;
+      if (sub) {
+        sub.textContent = 'Erreur JS: ' + bootErr.message;
+        sub.className = 'text-[11px] text-rose-400 mt-0.5';
+      }
     }
   </script>
 </body>
