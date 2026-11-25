@@ -331,7 +331,7 @@
       <div class="space-y-1.5">
         <label class="block text-xs font-semibold text-slate-300">Clé API Gemini (Google AI Studio)</label>
         <input id="settings-api-key" type="password" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" />
-        <p class="text-[11px] text-slate-400">Modèle actif : <code class="text-emerald-400">gemini-3.8-flash</code> (3 tentatives auto en cas de pic 503).</p>
+        <p class="text-[11px] text-slate-400">Modèle actif : <code class="text-emerald-400">gemini-3.8-flash</code> (mode texte léger + 3 tentatives auto).</p>
       </div>
 
       <div class="border-t border-slate-800 pt-3 space-y-2">
@@ -838,43 +838,26 @@ Si une capture d'écran de montre/activité est jointe, lis les métriques (dist
 
       try {
         const activeWeekNum = computeCurrentCalendarWeek();
+        const currentWeekData = state.program?.weeks?.find(w => w.weekNumber === activeWeekNum) || null;
         const contextSummary = JSON.stringify({
           today: new Date().toISOString().split('T')[0],
-          currentCalendarWeek: activeWeekNum,
           paces: state.paces,
-          program: state.program
+          currentWeek: currentWeekData
         });
 
-        const systemInstruction = `Tu es CoachPulse, un coach d'endurance et triathlon expert, direct, concret et empathique.
-Voici le contexte complet de l'athlète (date du jour, semaine calendaire en cours, allures cibles, programme multi-semaines) :
-${contextSummary}
+        const systemInstruction = `Tu es CoachPulse, un coach d'endurance et triathlon expert, direct et concis. Contexte de la semaine en cours : ${contextSummary}. Réponds directement en français.`;
 
-Tu DOIS répondre au format JSON strict suivant :
-{
-  "reply": "Ta réponse claire et motivante en français",
-  "proposedAction": null OU {
-    "type": "UPDATE_PACES" | "UPDATE_PROGRAM",
-    "summary": "Résumé court de la modification proposée (ex: Alléger les séances S2 et passer Semi à 4:40/km)",
-    "paces": { "hm": "...", "tenK": "...", "z2": "..." },
-    "updatedWeeks": [ ...copie complète et modifiée du tableau program.weeks si UPDATE_PROGRAM... ]
-  }
-}
-Ne propose "proposedAction" que si l'utilisateur demande d'ajuster ses allures ou de modifier/décaler/alléger des séances de son planning (ou si tu estimes de nouvelles allures suite à sa demande). Sinon mets "proposedAction": null.`;
-
-        const rawJson = await callGeminiAPI({
+        const replyText = await callGeminiAPI({
           prompt: text || "Analyse cette capture d'écran d'entraînement et donne-moi ton retour.",
           systemInstruction,
-          imageBase64: img,
-          responseMimeType: 'application/json'
+          imageBase64: img
         });
-
-        const parsed = JSON.parse(rawJson);
 
         state.chatHistory.push({
           role: 'assistant',
-          text: parsed.reply || "Bien reçu.",
+          text: replyText || "Bien reçu.",
           time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-          action: parsed.proposedAction || null,
+          action: null,
           actionApplied: false
         });
       } catch (err) {
